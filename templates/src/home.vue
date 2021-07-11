@@ -1,6 +1,6 @@
 <template>
   <div id="widget" class="d-flex" style="height: 100vh">
-    <div class="d-flex flex-column p-3 bg-light" style="width: 320px">
+    <div class="d-flex flex-column p-3 bg-light border-end no-select" style="width: 320px">
       <div class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
         <img src="./assets/logo.svg" width="70" height="70" />
         <strong class="fs-2 ms-2">DWords</strong>
@@ -35,8 +35,6 @@
         </ul>
       </div>
     </div>
-
-    <div class="b-example-divider"></div>
 
     <div class="d-flex flex-column" style="width: 100vw">
       <div class="list-group list-group-flush border-bottom scrollarea" style="overflow-y: auto;">
@@ -121,14 +119,8 @@ export default {
 };
 </script>
 
-<style>
-.b-example-divider {
-    flex-shrink: 0;
-    width: 1rem;
-    height: 100vh;
-    background-color: rgba(0, 0, 0, .1);
-    border: solid rgba(0, 0, 0, .15);
-    border-width: 1px 0;
-    box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
+<style scoped>
+.no-select {
+  user-select:none;
 }
 </style>
