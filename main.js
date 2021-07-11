@@ -4,8 +4,9 @@ const path = require('path')
 function createWindow () {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 600,
-    height: 400,
+    width: 1000,
+    height: 600,
+    minWidth: 1000,
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -27,6 +28,9 @@ app.whenReady().then(() => {
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+ipcMain.on('foo', (event, a, b, c) => {
 })
 
 // Quit when all windows are closed, except on macOS. There, it's common
