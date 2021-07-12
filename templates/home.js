@@ -1,5 +1,5 @@
 import Vue from 'vue'
-import home from './src/home.vue'
+import home from './src/Home.vue'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.min'
 
