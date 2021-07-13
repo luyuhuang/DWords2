@@ -20,6 +20,8 @@ function createWindow () {
 
 }
 
+let tray;
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
@@ -29,7 +31,21 @@ app.whenReady().then(() => {
     // On macOS it's common to re-create a window in the app when the
     // dock icon is clicked and there are no other windows open.
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
-  })
+  });
+
+  tray = new Tray('assets/logo.png');
+  tray.setToolTip('DWords');
+  tray.setContextMenu(Menu.buildFromTemplate([
+    {
+      label: 'exit',
+      click() {
+        app.quit();
+      }
+    }
+  ]));
+  tray.on('click', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+  });
 });
 
 ipcMain.on('close', () => {
@@ -39,9 +55,4 @@ ipcMain.on('close', () => {
   }
 });
 
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') app.quit()
-})
+app.on('window-all-closed', () => {})

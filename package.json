@@ -4,7 +4,7 @@
   "description": "Show words as Danmaku on the screen to help you memorize them",
   "author": "luyuhuang",
   "license": "MIT",
-  "main": "main.js",
+  "main": "src/main.js",
   "scripts": {
     "start": "vue-cli-service build && electron .",
     "serve": "vue-cli-service serve",
