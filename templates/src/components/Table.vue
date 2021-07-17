@@ -10,7 +10,7 @@
     </table>
     <div class="mb-auto" style="overflow-y: auto;">
       <table class="table table-striped table-borderless">
-        <tbody ref="table-body" >
+        <tbody ref="table-body">
           <tr v-for="(word, i) in wordList" :key="i"> <td>{{ word.word }}</td> <td>{{ word.paraphrase }}</td> </tr>
         </tbody>
       </table>
@@ -49,7 +49,7 @@ export default {
 
     clickClose() {
       ipcRenderer.send('close');
-    }
+    },
   },
 }
 </script>

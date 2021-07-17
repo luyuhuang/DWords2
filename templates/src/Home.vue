@@ -39,6 +39,6 @@ export default {
 
 <style scoped>
 .no-select {
-  user-select:none;
+  user-select: none;
 }
 </style>
