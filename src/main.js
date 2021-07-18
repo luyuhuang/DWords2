@@ -1,4 +1,4 @@
-const {app, BrowserWindow, ipcMain, Tray, Menu, nativeImage} = require('electron');
+const {app, BrowserWindow, ipcMain, Tray, Menu, screen} = require('electron');
 const path = require('path');
 
 function createWindow () {
@@ -18,16 +18,11 @@ function createWindow () {
 
   mainWindow.loadFile('dist/home.html');
 
-  createDanmaku({
-    word: 'apple',
-    paraphrase: '苹果',
-    showParaphrase: true,
-    color: 'red',
-  });
 }
 
 function createDanmaku(word) {
   const danmaku = new BrowserWindow({
+    show: false,
     useContentSize: true,
     resizable: false,
     alwaysOnTop: true,
@@ -36,21 +31,37 @@ function createDanmaku(word) {
     backgroundColor: '#00ffffff',
     hasShadow: false,
     alwaysOnTop: true,
+    title: 'Danmaku',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
     }
   });
 
+  const screenSize = screen.getPrimaryDisplay().size;
+  const x = screenSize.width;
+  const y = Math.floor(Math.random() * screenSize.height / 3);
+
   danmaku.loadFile('dist/danmaku.html', {query: word});
+  danmaku.showInactive();
+  danmaku.setPosition(x, y);
+  danmaku.setMenu(null);
   danmaku.setSkipTaskbar(true);
 }
 
 function showWindow() {
+  let mainWindow = null;
   for (const win of BrowserWindow.getAllWindows()) {
-    if (win.getTitle() === 'DWords' && !win.isVisible()) {
-      win.show();
+    if (win.getTitle() === 'DWords') {
+      mainWindow = win;
+      break;
     }
+  }
+
+  if (mainWindow) {
+    mainWindow.show();
+  } else {
+    createWindow();
   }
 }
 
@@ -60,7 +71,7 @@ app.whenReady().then(() => {
   createWindow();
   app.on('activate', showWindow);
 
-  tray = new Tray('assets/logo@2x.png');
+  tray = new Tray('assets/img/logo@2x.png');
   tray.setToolTip('DWords');
   tray.setContextMenu(Menu.buildFromTemplate([
     {
@@ -89,3 +100,41 @@ ipcMain.on('setWinSize', (event, width, height) => {
 });
 
 app.on('window-all-closed', () => {})
+
+setInterval(() => {
+  BrowserWindow.getAllWindows().forEach((win) => {
+    if (win.getTitle() === 'Danmaku') {
+      const [x, y] = win.getPosition();
+      if (x < 0) {
+        win.close();
+      } else {
+        win.setPosition(x - 2, y);
+      }
+    }
+  })
+}, 20);
+
+const words = [
+  {
+    word: 'syndicate',
+    paraphrase: '企业联合',
+    showParaphrase: false,
+    color: 'dark',
+  },
+  {
+    word: 'apple',
+    paraphrase: '苹果',
+    showParaphrase: false,
+    color: 'red',
+  },
+  {
+    word: 'convene',
+    paraphrase: '集合',
+    showParaphrase: false,
+    color: 'orange',
+  }
+]
+
+setInterval(() => {
+  createDanmaku(words[Math.floor(Math.random() * words.length)]);
+}, 5000);

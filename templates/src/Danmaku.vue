@@ -1,16 +1,27 @@
 <template>
   <div class="d-flex flex-column danmaku" id="widget" ref="widget">
-    <div class="align-self-start word" :class="color" @mousedown="mouseDownWord" @mouseup="mouseUpWord" ref="word">
+    <div class="align-self-start word" :class="color" :activated="activated" @mousedown="mouseDownWord" @mouseup="mouseUpWord" @mouseleave="mouseLeaveWord">
       <span>{{ word }}</span>
       <span class="ms-1" v-if="showParaphrase">{{ paraphrase }}</span>
     </div>
 
     <div class="align-self-start card mt-2" style="width: 18rem;" v-if="activated">
       <div class="card-body">
-        {{ paraphrase }}
+        <h5> {{ word }} <a @click="pronounce" class="bi bi-volume-up pronounce" href="#"></a> </h5>
+        <p>{{ paraphrase }}</p>
+        <div v-for="(dict, i) in dictionaries" :key="i">
+          <a @click="clickDictionary" href="#" :index="i"> {{ dict.name }} </a>
+        </div>
       </div>
-      <div class="container">
-        <div class="row">
+      <div class="d-flex flex-column">
+        <div class="d-flex justify-content-evenly">
+          <div v-for="(c, i) in colors" :key="i">
+            <input class="radio" type="radio" name="color" :id="'radio-' + c" :value="c" hidden v-model="color"/>
+            <label :for="'radio-' + c" class="radio" :class="c"></label>
+          </div>
+        </div>
+
+        <div class="d-flex">
           <button type="button" @click="clickClear" class="col m-1 btn btn-outline-secondary btn-sm">Clear</button>
           <button type="button" @click="toggleParaphrase" class="col m-1 btn btn-outline-secondary btn-sm">
             {{ showParaphrase ? 'Hide' : 'Show'}} paraphrase
@@ -23,7 +34,7 @@
 </template>
 
 <script>
-const { ipcRenderer } = window.require('electron');
+const { ipcRenderer, shell } = window.require('electron');
 
 const urlParams = new URLSearchParams(window.location.search);
 
@@ -38,6 +49,14 @@ export default {
       lastX: 0,
       lastY: 0,
       collaspe: null,
+
+      colors: ['red', 'coral', 'orange', 'green', 'blue', 'sky', 'dark', 'white'],
+      dictionaries: [
+        {
+          name: 'Merriam Webster Dictionary',
+          url: 'https://www.merriam-webster.com/dictionary/'
+        }
+      ],
     };
   },
 
@@ -48,6 +67,7 @@ export default {
 
   methods: {
     mouseDownWord(e) {
+      document.title = 'Danmaku-dragging';
       this.lastX = e.screenX;
       this.lastY = e.screenY;
     },
@@ -56,19 +76,27 @@ export default {
       if (d < 5) {
         this.clickWord(e)
       }
+      document.title = this.activated ? 'Danmaku-activated' : 'Danmaku';
+    },
+    mouseLeaveWord() {
+      document.title = this.activated ? 'Danmaku-activated' : 'Danmaku';
     },
 
     clickWord() {
       this.activated = !this.activated;
-      const word = this.$refs.word;
-      if (this.activated) {
-        word.classList.add('activated');
-      } else {
-        word.classList.remove('activated');
-      }
     },
 
     clickClear() {
+    },
+
+    pronounce(e) {
+      const c = this.word[0].toUpperCase();
+      new Audio(`../assets/audio/${c}/${this.word}.mp3`).play();
+    },
+
+    clickDictionary(e) {
+      const dict = this.dictionaries[e.target.getAttribute('index')]
+      shell.openExternal(dict.url + this.word);
     },
 
     toggleParaphrase() {
@@ -95,13 +123,10 @@ export default {
   border-radius: 10px;
   padding: 8px;
   opacity: 0.5;
+  transition-duration: 0.3s;
 }
 
-.danmaku .card {
-  border-radius: 10px;
-}
-
-.danmaku .word.activated {
+.danmaku .word[activated] {
   opacity: 1;
 }
 
@@ -109,35 +134,63 @@ export default {
   opacity: 1;
 }
 
-.danmaku .word.red {
+.danmaku .card {
+  border-radius: 10px;
+}
+
+.pronounce {
+  color: #6c757d;
+}
+
+.pronounce:hover {
+  color: #212529;
+}
+
+label.radio {
+  height: 17px;
+  width: 17px;
+  border-radius: 3px;
+}
+
+input.radio:checked + label.radio {
+  border-style: solid;
+  border-width: 2px;
+  border-color: black;
+}
+
+input.radio:checked + label.radio.dark {
+  border-color: orange;
+}
+
+.red {
   background-color: #ff4757;
   color: #ffffff;
 }
-.danmaku .word.coral {
+.coral {
   background-color: #ff7f50;
   color: #ffffff;
 }
-.danmaku .word.orange {
+.orange {
   background-color: #ffa502;
   color: #ffffff;
 }
-.danmaku .word.green {
+.green {
   background-color: #2ed573;
   color: #ffffff;
 }
-.danmaku .word.blue {
+.blue {
   background-color: #1e90ff;
   color: #ffffff;
 }
-.danmaku .word.sky {
+.sky {
   background-color: #5352ed;
   color: #ffffff;
 }
-.danmaku .word.dark {
+.dark {
   background-color: #2f3542;
   color: #ffffff;
 }
-.danmaku .word.white {
+.white {
   background-color: #ecf0f1;
   border-style: solid;
   border-width: 1px;
