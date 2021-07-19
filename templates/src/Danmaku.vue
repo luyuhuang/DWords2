@@ -1,6 +1,8 @@
 <template>
   <div class="d-flex flex-column danmaku" id="widget" ref="widget">
-    <div class="align-self-start word" :class="color" :activated="activated" @mousedown="mouseDownWord" @mouseup="mouseUpWord" @mouseleave="mouseLeaveWord">
+    <div class="align-self-start word" :class="color" :activated="activated"
+      @mousedown="mouseDownWord" @mouseup="mouseUpWord"
+    >
       <span>{{ word }}</span>
       <span class="ms-1" v-if="showParaphrase">{{ paraphrase }}</span>
     </div>
@@ -46,6 +48,8 @@ export default {
       showParaphrase: urlParams.get('showParaphrase') === 'true',
       color: urlParams.get('color'),
       activated: false,
+      beginX: 0,
+      beginY: 0,
       lastX: 0,
       lastY: 0,
       collaspe: null,
@@ -63,22 +67,29 @@ export default {
   mounted() {
     new ResizeObserver(this.updateSize).observe(this.$refs.widget);
     this.updateSize();
+    document.addEventListener('mousemove', this.mouseMove);
   },
 
   methods: {
     mouseDownWord(e) {
       document.title = 'Danmaku-dragging';
-      this.lastX = e.screenX;
-      this.lastY = e.screenY;
+      this.beginX = this.lastX = e.screenX;
+      this.beginY = this.lastY = e.screenY;
+    },
+    mouseMove(e) {
+      if (document.title === 'Danmaku-dragging') {
+        const dx = e.screenX - this.lastX;
+        const dy = e.screenY - this.lastY;
+        ipcRenderer.sendSync('moveWin', dx, dy);
+        this.lastX = e.screenX;
+        this.lastY = e.screenY;
+      }
     },
     mouseUpWord(e) {
-      const d = Math.abs(e.screenX - this.lastX) + Math.abs(e.screenY - this.lastY)
+      const d = Math.abs(e.screenX - this.beginX) + Math.abs(e.screenY - this.beginY)
       if (d < 5) {
         this.clickWord(e)
       }
-      document.title = this.activated ? 'Danmaku-activated' : 'Danmaku';
-    },
-    mouseLeaveWord() {
       document.title = this.activated ? 'Danmaku-activated' : 'Danmaku';
     },
 
@@ -113,12 +124,11 @@ export default {
 
 <style scoped>
 .danmaku {
-  pointer-events: all;
   position: absolute;
 }
 
 .danmaku .word {
-  -webkit-app-region: drag;
+  /* -webkit-app-region: drag; */
   user-select: none;
   border-radius: 10px;
   padding: 8px;

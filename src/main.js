@@ -20,7 +20,7 @@ function createWindow () {
 
 }
 
-function createDanmaku(word) {
+async function createDanmaku(word) {
   const danmaku = new BrowserWindow({
     show: false,
     useContentSize: true,
@@ -38,15 +38,17 @@ function createDanmaku(word) {
     }
   });
 
+  await danmaku.loadFile('dist/danmaku.html', {query: word});
+  danmaku.setSkipTaskbar(true);
+  danmaku.setMenu(null);
+  danmaku.showInactive();
+
   const screenSize = screen.getPrimaryDisplay().size;
   const x = screenSize.width;
   const y = Math.floor(Math.random() * screenSize.height / 3);
 
-  danmaku.loadFile('dist/danmaku.html', {query: word});
-  danmaku.showInactive();
   danmaku.setPosition(x, y);
-  danmaku.setMenu(null);
-  danmaku.setSkipTaskbar(true);
+  // danmaku.webContents.openDevTools()
 }
 
 function showWindow() {
@@ -96,8 +98,16 @@ ipcMain.on('setIgnoreMouseEvents', (event, ignore, options) => {
 
 ipcMain.on('setWinSize', (event, width, height) => {
   const win = BrowserWindow.fromId(event.sender.id);
+  win.setMinimumSize(width, height);
   win.setSize(width, height);
 });
+
+ipcMain.on('moveWin', (event, dx, dy) => {
+  const win = BrowserWindow.fromId(event.sender.id);
+  const [x, y] = win.getPosition();
+  win.setPosition(x + dx, y + dy);
+  event.returnValue = true;
+})
 
 app.on('window-all-closed', () => {})
 
@@ -108,7 +118,7 @@ setInterval(() => {
       if (x < 0) {
         win.close();
       } else {
-        win.setPosition(x - 2, y);
+        win.setPosition(x - 3, y);
       }
     }
   })
