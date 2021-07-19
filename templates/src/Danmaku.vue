@@ -1,8 +1,6 @@
 <template>
   <div class="d-flex flex-column danmaku" id="widget" ref="widget">
-    <div class="align-self-start word" :class="color" :activated="activated"
-      @mousedown="mouseDownWord" @mouseup="mouseUpWord"
-    >
+    <div class="align-self-start word" :class="color" :activated="activated" @mousedown="mouseDownWord">
       <span>{{ word }}</span>
       <span class="ms-1" v-if="showParaphrase">{{ paraphrase }}</span>
     </div>
@@ -67,7 +65,9 @@ export default {
   mounted() {
     new ResizeObserver(this.updateSize).observe(this.$refs.widget);
     this.updateSize();
+
     document.addEventListener('mousemove', this.mouseMove);
+    document.addEventListener('mouseup', this.mouseUp);
   },
 
   methods: {
@@ -85,12 +85,14 @@ export default {
         this.lastY = e.screenY;
       }
     },
-    mouseUpWord(e) {
-      const d = Math.abs(e.screenX - this.beginX) + Math.abs(e.screenY - this.beginY)
-      if (d < 5) {
-        this.clickWord(e)
+    mouseUp(e) {
+      if (document.title === 'Danmaku-dragging') {
+        const d = Math.abs(e.screenX - this.beginX) + Math.abs(e.screenY - this.beginY)
+        if (d < 5) {
+          this.clickWord(e)
+        }
+        document.title = this.activated ? 'Danmaku-activated' : 'Danmaku';
       }
-      document.title = this.activated ? 'Danmaku-activated' : 'Danmaku';
     },
 
     clickWord() {
