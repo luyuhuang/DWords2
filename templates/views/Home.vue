@@ -6,8 +6,8 @@
 </template>
 
 <script>
-import Table from './components/Table.vue'
-import SideBar from './components/SideBar.vue'
+import Table from '../components/Table.vue'
+import SideBar from '../components/SideBar.vue'
 
 export default {
   name: "Home",
@@ -20,7 +20,7 @@ export default {
   components: {Table, SideBar},
 
   mounted() {
-    this.setCurrentList('current');
+    this.setCurrentList('Current');
   },
 
   methods: {

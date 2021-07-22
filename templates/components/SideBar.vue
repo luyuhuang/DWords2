@@ -1,21 +1,15 @@
 <template>
   <div class="d-flex flex-column bg-light border-end no-select" style="width: 320px">
     <div class="d-flex align-items-center p-4 pb-1" style="-webkit-app-region: drag">
-      <img src="../../../assets/img/logo.svg" width="60" height="60" />
+      <img src="../../assets/img/logo.svg" width="60" height="60" />
       <strong class="fs-3 ms-2">DWords</strong>
     </div>
 
     <div class="d-flex flex-column p-3 pt-0" style="height: 100vh">
       <hr>
       <ul class="nav nav-pills flex-column mb-auto">
-        <li class="nav-item">
-          <a name="current" :class="navItemCls('current')" v-on:click="clickNav"> Current </a>
-        </li>
-        <li class="nav-item">
-          <a name="memorized" :class="navItemCls('memorized')" v-on:click="clickNav"> Memorized </a>
-        </li>
-        <li class="nav-item">
-          <a name="all" :class="navItemCls('all')" v-on:click="clickNav"> All </a>
+        <li class="nav-item" v-for="(tab, i) in tabs" :key="i">
+          <a :name="tab" :class="navItemCls(tab)" @click="clickNav"> {{ tab }} </a>
         </li>
       </ul>
 
@@ -23,14 +17,14 @@
 
       <div class="dropdown">
         <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
-          <strong>mdo</strong>
+          <strong>Menus</strong>
         </a>
         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-          <li><a class="dropdown-item" href="#">New project...</a></li>
-          <li><a class="dropdown-item" href="#">Settings</a></li>
-          <li><a class="dropdown-item" href="#">Profile</a></li>
+          <li><a class="dropdown-item" href="#/plans">Plans</a></li>
+          <li><a class="dropdown-item" href="#/settings">Settings</a></li>
+          <li><a class="dropdown-item" href="#">About</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#">Sign out</a></li>
+          <li><a class="dropdown-item" href="#">Exit</a></li>
         </ul>
       </div>
     </div>
@@ -42,7 +36,8 @@ export default {
   name: 'SideBar',
   data() {
     return {
-      currentTab: 'current',
+      currentTab: 'Current',
+      tabs: ['Current', 'Planning', 'Memorized', 'All'],
     }
   },
 
