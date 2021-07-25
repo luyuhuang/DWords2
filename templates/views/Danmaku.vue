@@ -22,7 +22,9 @@
         </div>
 
         <div class="d-flex">
-          <button type="button" @click="clickClear" class="col m-1 btn btn-outline-secondary btn-sm">Clear</button>
+          <button type="button" @click="clickMemorized" class="col m-1 btn btn-outline-secondary btn-sm">
+            {{status === 0 ? 'Memorized' : 'Revoke'}}
+          </button>
           <button type="button" @click="toggleParaphrase" class="col m-1 btn btn-outline-secondary btn-sm">
             {{ showParaphrase ? 'Hide' : 'Show'}} paraphrase
           </button>
@@ -42,8 +44,10 @@ export default {
   data() {
     return {
       word: urlParams.get('word'),
+      planID: Number(urlParams.get('plan_id')),
       paraphrase: urlParams.get('paraphrase'),
-      showParaphrase: urlParams.get('showParaphrase') === 'true',
+      showParaphrase: urlParams.get('show_paraphrase') === 'true',
+      status: Number(urlParams.get('status')),
       color: urlParams.get('color'),
       activated: false,
       beginX: 0,
@@ -99,7 +103,9 @@ export default {
       this.activated = !this.activated;
     },
 
-    clickClear() {
+    clickMemorized() {
+      this.status = this.status === 1 ? 0 : 1;
+      ipcRenderer.invoke('setWordStatus', this.word, this.planID, this.status);
     },
 
     pronounce(e) {
@@ -118,7 +124,7 @@ export default {
 
     updateSize() {
       const widget = this.$refs.widget;
-      ipcRenderer.send('setWinSize', widget.clientWidth, widget.clientHeight);
+      ipcRenderer.send('setWinSize', widget.clientWidth + 1, widget.clientHeight);
     },
   }
 }

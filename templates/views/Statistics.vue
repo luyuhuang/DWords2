@@ -1,6 +1,6 @@
 <template>
   <div class="d-flex flex-column" style="user-select: none; height: 100vh">
-    <Title title="Settings"></Title>
+    <Title title="Statistics"></Title>
   </div>
 </template>
 

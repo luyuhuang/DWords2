@@ -1,14 +1,20 @@
 const { open } = require("sqlite");
 const { Database } = require("sqlite3");
 
+let userDB;
+
 async function initDB() {
-    const db = await open({filename: "dwords.db", driver: Database});
-    await db.migrate({
+    userDB = await open({filename: "dwords.db", driver: Database});
+    await userDB.migrate({
         table: 'migrations',
         migrationsPath: './migrations',
-    })
+    });
+}
+
+function getUserDB() {
+    return userDB;
 }
 
 module.exports = {
-    initDB,
+    initDB, getUserDB,
 };

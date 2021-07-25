@@ -5,7 +5,7 @@
       <strong class="fs-3 ms-2">DWords</strong>
     </div>
 
-    <div class="d-flex flex-column p-3 pt-0" style="height: 100vh">
+    <div class="d-flex flex-column p-3 pt-0" style="flex: 1">
       <hr>
       <ul class="nav nav-pills flex-column mb-auto">
         <li class="nav-item" v-for="(tab, i) in tabs" :key="i">
@@ -20,11 +20,12 @@
           <strong>Menus</strong>
         </a>
         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
-          <li><a class="dropdown-item" href="#/plans">Plans</a></li>
-          <li><a class="dropdown-item" href="#/settings">Settings</a></li>
-          <li><a class="dropdown-item" href="#">About</a></li>
+          <li><a class="dropdown-item" href="#/plans"><i class="bi bi-journals me-2"></i>Plans</a></li>
+          <li><a class="dropdown-item" href="#/statistics"><i class="bi bi-bar-chart-line me-2"></i>Statistics</a></li>
+          <li><a class="dropdown-item" href="#/settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>About</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#">Exit</a></li>
+          <li><a class="dropdown-item" href="#"><i class="bi bi-x-circle me-2"></i>Exit</a></li>
         </ul>
       </div>
     </div>
@@ -39,6 +40,10 @@ export default {
       currentTab: 'Current',
       tabs: ['Current', 'Planning', 'Memorized', 'All'],
     }
+  },
+
+  mounted() {
+    this.$emit('on-change-tag', this.currentTab);
   },
 
   methods: {

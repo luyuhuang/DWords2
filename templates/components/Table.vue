@@ -5,12 +5,12 @@
     </div>
     <table class="table m-0 border-end no-select">
       <thead>
-        <tr> <th ref="word-head">Word</th> <th>Paraphrase</th> </tr>
+        <tr> <th ref="wordHead">Word</th> <th>Paraphrase</th> </tr>
       </thead>
     </table>
     <div class="mb-auto" style="overflow-y: auto;">
       <table class="table table-striped table-borderless">
-        <tbody ref="table-body">
+        <tbody ref="tableBody">
           <tr v-for="(word, i) in wordList" :key="i"> <td>{{ word.word }}</td> <td>{{ word.paraphrase }}</td> </tr>
         </tbody>
       </table>
@@ -32,7 +32,7 @@ export default {
   },
 
   mounted() {
-    const tbody = this.$refs['table-body'];
+    const tbody = this.$refs.tableBody;
     new MutationObserver(this.resizeThead).observe(tbody, {
       childList: true, characterData: true, subtree: true
     });
@@ -41,9 +41,10 @@ export default {
 
   methods: {
     resizeThead() {
-      const first = this.$refs['table-body'].children[0];
+      const tbody = this.$refs.tableBody;
+      const first = tbody && tbody.children[0];
       if (first) {
-        this.$refs['word-head'].width = first.children[0].clientWidth;
+        this.$refs.wordHead.width = first.children[0].clientWidth;
       }
     },
 

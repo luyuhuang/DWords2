@@ -1,9 +1,11 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, screen } = require('electron');
+const { getUserDB } = require('./database');
+const ipc = require('./ipc')
 
 function initDWords() {
     const dwords = {};
 
-    setIPC();
+    setIPC(dwords);
     setAppEvents();
     createMainWindow();
 
@@ -91,59 +93,27 @@ function setTray() {
     return tray;
 }
 
-function getWinByWebContentsID(id) {
-    return BrowserWindow.getAllWindows().find(win => win.webContents.id === id)
+function setIPC(dwords) {
+    for (const ch in ipc) {
+        const f = ipc[ch].bind(dwords);
+        if (f[Symbol.toStringTag] === 'AsyncFunction') {
+            ipcMain.handle(ch, f);
+        } else {
+            ipcMain.on(ch, f);
+        }
+    }
 }
-
-function setIPC() {
-    ipcMain.on('close', (event) => {
-        const win = getWinByWebContentsID(event.sender.id);
-        win.hide();
-    });
-
-    ipcMain.on('setIgnoreMouseEvents', (event, ignore, options) => {
-        const win = getWinByWebContentsID(event.sender.id);
-        win.setIgnoreMouseEvents(ignore, options);
-    });
-
-    ipcMain.on('setWinSize', (event, width, height) => {
-        const win = getWinByWebContentsID(event.sender.id);
-        win.setMinimumSize(width, height);
-        win.setSize(width, height);
-    });
-
-    ipcMain.on('moveWin', (event, dx, dy) => {
-        const win = getWinByWebContentsID(event.sender.id);
-        const [x, y] = win.getPosition();
-        win.setPosition(x + dx, y + dy);
-        event.returnValue = true;
-    })
-}
-
-const words = [
-  {
-    word: 'syndicate',
-    paraphrase: '企业联合',
-    showParaphrase: false,
-    color: 'dark',
-  },
-  {
-    word: 'apple',
-    paraphrase: '苹果',
-    showParaphrase: false,
-    color: 'red',
-  },
-  {
-    word: 'convene',
-    paraphrase: '集合',
-    showParaphrase: false,
-    color: 'orange',
-  }
-]
 
 function setDanmakuLauncher(interval) {
-    return setInterval(() => {
-        createDanmaku(words[Math.floor(Math.random() * words.length)]);
+    return setInterval(async () => {
+        const planID = await ipc.getCurrentPlan();
+        if (!planID) return;
+        const word = await getUserDB().get(`with u as (
+            select * from words where plan_id = ?
+            order by time limit ?) select * from u order by random() limit 1`,
+            planID, 10);
+        if (!word.color) word.color = 'dark';
+        createDanmaku(word);
     }, interval);
 }
 

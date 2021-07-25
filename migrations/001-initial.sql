@@ -2,11 +2,20 @@
 -- Up
 --------------------------------------------------------------------------------
 
+create table sys (
+    key varchar(255) primary key,
+    value text not null
+);
+
+create table plans (
+    id integer primary key autoincrement,
+    name varchar(255) not null
+);
+
 create table words (
     plan_id integer not null,
     word varchar(128),
-    time integer not null default
-        (cast((julianday('now') - 2440587.5) * 86400000 as integer)),
+    time integer not null,
     paraphrase text not null default '',
     show_paraphrase bool,
     color varchar(32),
@@ -14,8 +23,12 @@ create table words (
     primary key (plan_id, word)
 );
 
+create index words_plan_id on words(plan_id);
+
 --------------------------------------------------------------------------------
 -- Down
 --------------------------------------------------------------------------------
 
+drop table sys;
+drop table plans;
 drop table words;
