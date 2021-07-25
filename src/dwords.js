@@ -112,6 +112,7 @@ function setDanmakuLauncher(interval) {
             select * from words where plan_id = ?
             order by time limit ?) select * from u order by random() limit 1`,
             planID, 10);
+        if (!word) return;
         if (!word.color) word.color = 'dark';
         createDanmaku(word);
     }, interval);
