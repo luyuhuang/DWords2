@@ -66,7 +66,6 @@ async function createDanmaku(word) {
     const y = Math.floor(Math.random() * screenSize.height / 3);
 
     danmaku.setPosition(x, y);
-    // danmaku.webContents.openDevTools()
 }
 
 function showWindow() {
@@ -109,7 +108,7 @@ function setDanmakuLauncher(interval) {
         const planID = await ipc.getCurrentPlan();
         if (!planID) return;
         const word = await getUserDB().get(`with u as (
-            select * from words where plan_id = ?
+            select * from words where plan_id = ? and status = 0
             order by time limit ?) select * from u order by random() limit 1`,
             planID, 10);
         if (!word) return;

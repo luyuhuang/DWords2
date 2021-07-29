@@ -1,5 +1,4 @@
-const { BrowserWindow, ipcMain } = require("electron");
-const { getUserDB } = require("./database");
+const { getUserDB, getDictDB } = require("./database");
 const { getWinByWebContentsID, getMainWin } = require("./utils");
 
 
@@ -85,7 +84,11 @@ async function setWordStatus(_, word, planID, status) {
     getMainWin().webContents.send("refreshList");
 }
 
+async function consultDictionary(_, word) {
+    return await getDictDB().get(`select * from dict_en where word = ?`, word);
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
-    getWords, selectPlan, newPlan, addWord, getWordList, setWordStatus
+    getWords, selectPlan, newPlan, addWord, getWordList, setWordStatus, consultDictionary
 }

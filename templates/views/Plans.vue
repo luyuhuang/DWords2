@@ -53,10 +53,10 @@
               </tr>
               <tr v-if="adding">
                 <td>
-                  <input class="form-control" placeholder="Word" ref="wordInput" @keyup.enter="enterWord" v-model="inputedWord">
+                  <input class="form-control" placeholder="Word" ref="wordInput" @change="typeWord" @keyup.enter="enterWord" v-model="inputedWord">
                 </td>
                 <td>
-                  <input class="form-control" placeholder="Paraphrase" @keyup.enter="enterWord" v-model="inputedParaphrase">
+                  <input class="form-control" placeholder="Paraphrase" ref="paraphraseInput" @keyup.enter="enterParaphrase" v-model="inputedParaphrase">
                 </td>
               </tr>
               <tr style="height: 4rem"></tr>
@@ -169,16 +169,34 @@ export default {
       }
     },
 
-    enterWord() {
-      if (this.inputedWord.length > 0) {
-        const now = new Date().getTime();
-        this.words.push({
-          word: this.inputedWord,
-          paraphrase: this.inputedParaphrase,
-          time: now,
-        });
-        ipcRenderer.invoke('addWord', this.selectedPlan, this.inputedWord, now, this.inputedParaphrase);
+    async typeWord() {
+      const res = await ipcRenderer.invoke('consultDictionary', this.inputedWord);
+      this.inputedParaphrase = res.paraphrase_zh;
+    },
+
+    enterWord(e) {
+      if (this.inputedWord.length <= 0) return;
+
+      if (e.ctrlKey || this.inputedParaphrase.length > 0) {
+        this.addWord();
+      } else {
+        this.$refs.paraphraseInput.focus();
       }
+    },
+
+    enterParaphrase() {
+      this.addWord();
+    },
+
+    addWord() {
+      const now = new Date().getTime();
+      this.words.push({
+        word: this.inputedWord,
+        paraphrase: this.inputedParaphrase,
+        time: now,
+      });
+      ipcRenderer.invoke('addWord', this.selectedPlan, this.inputedWord, now, this.inputedParaphrase);
+
       this.inputedWord = this.inputedParaphrase = '';
       this.$refs.wordInput.focus();
       this.$nextTick(() => this.scrollBottom());
