@@ -1,0 +1,122 @@
+<template>
+  <div class="mb-4">
+    <h3 :id="id">Danmaku</h3>
+
+    <div class="mb-2">
+      <span>Speed</span>
+      <input type="range" class="form-range"
+        v-model="settings.danmakuSpeed" @change="change('danmakuSpeed')">
+    </div>
+
+    <div class="mb-2">
+      <span>Frequency</span>
+      <input type="range" class="form-range"
+        v-model="settings.danmakuFrequency" @change="change('danmakuFrequency')">
+    </div>
+
+    <div class="mb-2">
+      <span>Transparency</span>
+      <input type="range" class="form-range"
+        v-model="settings.danmakuTransparency" @change="change('danmakuTransparency')">
+    </div>
+
+    <div class="mb-2 form-check form-switch">
+      <input class="form-check-input" type="checkbox"
+        v-model="settings.defaultShowParaphrase" @change="change('defaultShowParaphrase')">
+      <label class="form-check-label">Default show paraphrase</label>
+    </div>
+
+    <div class="mb-2">
+      <span class="form-label">Paraphrase length limit</span>
+      <input type="number" min="3" max="99" class="form-control form-control-sm"
+        v-model="settings.maxPharaphraseLen" @change="change('maxPharaphraseLen')">
+    </div>
+
+    <div class="mb-2">
+      <span>Default color:</span>
+      <div class="d-flex flex-row justify-content-between">
+        <div v-for="(c, i) in colors" :key="i">
+          <input class="radio" type="radio" name="color" :id="'radio-' + c" :value="c" hidden
+            v-model="settings.danmakuColor" @change="change('danmakuColor')"/>
+          <label :for="'radio-' + c" class="radio" :class="c"></label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</template>
+
+<script>
+export default {
+  data() {
+    return {
+      colors: ['red', 'coral', 'orange', 'green', 'blue', 'sky', 'dark', 'white'],
+    }
+  },
+
+  props: {
+    id: String,
+    settings: Object,
+  },
+
+  methods: {
+    change(...keys) {
+      this.$emit('change', ...keys);
+    },
+  },
+}
+</script>
+
+<style scoped>
+label.radio {
+  height: 22px;
+  width: 22px;
+  border-radius: 5px;
+}
+
+input.radio:checked + label.radio {
+  border-style: solid;
+  border-width: 3px;
+  border-color: black;
+}
+
+input.radio:checked + label.radio.dark {
+  border-color: orange;
+}
+
+.red {
+  background-color: #ff4757;
+  color: #ffffff;
+}
+.coral {
+  background-color: #ff7f50;
+  color: #ffffff;
+}
+.orange {
+  background-color: #ffa502;
+  color: #ffffff;
+}
+.green {
+  background-color: #2ed573;
+  color: #ffffff;
+}
+.blue {
+  background-color: #1e90ff;
+  color: #ffffff;
+}
+.sky {
+  background-color: #5352ed;
+  color: #ffffff;
+}
+.dark {
+  background-color: #2f3542;
+  color: #ffffff;
+}
+.white {
+  background-color: #ecf0f1;
+  border-style: solid;
+  border-width: 1px;
+  border-color: rgba(0, 0, 0, 0.125);
+  color: #000000;
+}
+</style>

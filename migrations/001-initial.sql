@@ -25,6 +25,11 @@ create table words (
 
 create index words_plan_id on words(plan_id);
 
+create table settings (
+    key varchar(255) primary key,
+    value text not null
+);
+
 --------------------------------------------------------------------------------
 -- Down
 --------------------------------------------------------------------------------
@@ -32,3 +37,4 @@ create index words_plan_id on words(plan_id);
 drop table sys;
 drop table plans;
 drop table words;
+drop table settings;

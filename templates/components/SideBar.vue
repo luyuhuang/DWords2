@@ -37,13 +37,12 @@ export default {
   name: 'SideBar',
   data() {
     return {
-      currentTab: 'Current',
       tabs: ['Current', 'Planning', 'Memorized', 'All'],
     }
   },
 
-  mounted() {
-    this.$emit('on-change-tag', this.currentTab);
+  props: {
+    currentTab: String,
   },
 
   methods: {
@@ -52,8 +51,7 @@ export default {
     },
 
     clickNav({target}) {
-      this.currentTab = target.name;
-      this.$emit('on-change-tag', this.currentTab);
+      this.$emit('on-change-tag', target.name);
     },
   },
 

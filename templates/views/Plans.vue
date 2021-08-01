@@ -49,14 +49,15 @@
           <table class="table table-striped table-borderless">
             <tbody ref="tableBody">
               <tr v-for="(word, i) in words" :key="i">
-                <td>{{ word.word }}</td> <td> {{ word.paraphrase }} </td>
+                <td>{{ word.word }}</td>
+                <td>{{ html2text(word.paraphrase) }}</td>
               </tr>
               <tr v-if="adding">
                 <td>
-                  <input class="form-control" placeholder="Word" ref="wordInput" @change="typeWord" @keyup.enter="enterWord" v-model="inputedWord">
+                  <input class="form-control form-control-sm" placeholder="Word" ref="wordInput" @keyup.enter="enterWord" v-model="inputedWord">
                 </td>
                 <td>
-                  <input class="form-control" placeholder="Paraphrase" ref="paraphraseInput" @keyup.enter="enterParaphrase" v-model="inputedParaphrase">
+                  <input class="form-control form-control-sm" placeholder="Paraphrase" ref="paraphraseInput" @keyup.enter="enterParaphrase" v-model="inputedParaphrase">
                 </td>
               </tr>
               <tr style="height: 4rem"></tr>
@@ -74,6 +75,7 @@
 </template>
 
 <script>
+import { html2text } from '../scripts/utils';
 import Title from '../components/Title.vue'
 const { ipcRenderer } = window.require('electron');
 
@@ -111,6 +113,8 @@ export default {
   },
 
   methods: {
+    html2text,
+
     async getPlans() {
       this.plans = await ipcRenderer.invoke('getPlans');
       this.currentPlan = await ipcRenderer.invoke('getCurrentPlan');
@@ -169,11 +173,6 @@ export default {
       }
     },
 
-    async typeWord() {
-      const res = await ipcRenderer.invoke('consultDictionary', this.inputedWord);
-      this.inputedParaphrase = res.paraphrase_zh;
-    },
-
     enterWord(e) {
       if (this.inputedWord.length <= 0) return;
 
@@ -185,6 +184,8 @@ export default {
     },
 
     enterParaphrase() {
+      if (this.inputedWord.length <= 0) return;
+
       this.addWord();
     },
 
@@ -209,7 +210,23 @@ export default {
         this.$refs.wordHead.width = first.children[0].clientWidth;
       }
     },
-  }
+  },
+
+  watch: {
+    inputedWord(word) {
+      if (this.inputTimer) {
+        clearTimeout(this.inputTimer);
+      }
+      this.inputTimer = setTimeout(async () => {
+        const res = await ipcRenderer.invoke('consultDictionary', word);
+        if (res) {
+          this.inputedParaphrase = res.paraphrase;
+        } else {
+          this.inputedParaphrase = '';
+        }
+      }, 100);
+    }
+  },
 }
 </script>
 

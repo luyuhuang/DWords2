@@ -1,14 +1,19 @@
 <template>
   <div class="d-flex flex-column danmaku" id="widget" ref="widget">
-    <div class="align-self-start word" :class="color" :activated="activated" @mousedown="mouseDownWord">
+    <div class="align-self-start word"
+      :style="wordStyle"
+      :class="color || defaultColor"
+      :activated="activated"
+      @mousedown="mouseDownWord"
+    >
       <span>{{ word }}</span>
-      <span class="ms-1" v-if="showParaphrase">{{ paraphrase }}</span>
+      <span class="ms-1" v-if="isParaphrase">{{ brief(paraphrase) }}</span>
     </div>
 
     <div class="align-self-start card mt-2" style="width: 18rem;" v-if="activated">
       <div class="card-body">
         <h5> {{ word }} <a @click="pronounce" class="bi bi-volume-up pronounce" href="#"></a> </h5>
-        <p>{{ paraphrase }}</p>
+        <p v-html="paraphrase"></p>
         <div v-for="(dict, i) in dictionaries" :key="i">
           <a @click="clickDictionary" href="#" :index="i"> {{ dict.name }} </a>
         </div>
@@ -26,7 +31,7 @@
             {{status === 0 ? 'Memorized' : 'Revoke'}}
           </button>
           <button type="button" @click="toggleParaphrase" class="col m-1 btn btn-outline-secondary btn-sm">
-            {{ showParaphrase ? 'Hide' : 'Show'}} paraphrase
+            {{ isParaphrase ? 'Hide' : 'Show'}} paraphrase
           </button>
         </div>
       </div>
@@ -36,17 +41,19 @@
 </template>
 
 <script>
+import { html2text } from '../scripts/utils';
 const { ipcRenderer, shell } = window.require('electron');
 
 const urlParams = new URLSearchParams(window.location.search);
 
 export default {
   data() {
+    const show_paraphrase = urlParams.get('show_paraphrase');
     return {
       word: urlParams.get('word'),
       planID: Number(urlParams.get('plan_id')),
       paraphrase: urlParams.get('paraphrase'),
-      showParaphrase: urlParams.get('show_paraphrase') === 'true',
+      showParaphrase: show_paraphrase ? show_paraphrase === 'true' : null,
       status: Number(urlParams.get('status')),
       color: urlParams.get('color'),
       activated: false,
@@ -57,12 +64,11 @@ export default {
       collaspe: null,
 
       colors: ['red', 'coral', 'orange', 'green', 'blue', 'sky', 'dark', 'white'],
-      dictionaries: [
-        {
-          name: 'Merriam Webster Dictionary',
-          url: 'https://www.merriam-webster.com/dictionary/'
-        }
-      ],
+      dictionaries: [],
+      maxPharaphraseLen: 16,
+      defaultColor: '',
+      opacity: 0.5,
+      defaultShowParaphrase: false,
     };
   },
 
@@ -72,9 +78,32 @@ export default {
 
     document.addEventListener('mousemove', this.mouseMove);
     document.addEventListener('mouseup', this.mouseUp);
+
+    this.fetchSettings();
+    ipcRenderer.on('refreshDanmaku', this.fetchSettings);
   },
 
   methods: {
+    brief(s) {
+      s = html2text(s);
+      if (s.length > this.maxPharaphraseLen) {
+        s = s.substr(0, this.maxPharaphraseLen) + '...';
+      }
+      return s;
+    },
+
+    async fetchSettings() {
+      const settings = await ipcRenderer.invoke('getSettings',
+        'externalDictionaries', 'danmakuTransparency', 'maxPharaphraseLen',
+        'danmakuColor', 'defaultShowParaphrase');
+
+      this.dictionaries = settings.externalDictionaries;
+      this.opacity = settings.danmakuTransparency / 100;
+      this.maxPharaphraseLen = settings.maxPharaphraseLen;
+      this.defaultColor = settings.danmakuColor;
+      this.defaultShowParaphrase = settings.defaultShowParaphrase;
+    },
+
     mouseDownWord(e) {
       document.title = 'Danmaku-dragging';
       this.beginX = this.lastX = e.screenX;
@@ -119,14 +148,24 @@ export default {
     },
 
     toggleParaphrase() {
-      this.showParaphrase = !this.showParaphrase;
+      this.showParaphrase = !this.isParaphrase;
     },
 
     updateSize() {
       const widget = this.$refs.widget;
-      ipcRenderer.send('setWinSize', widget.clientWidth + 1, widget.clientHeight);
+      ipcRenderer.send('setWinSize', widget.clientWidth + 10, widget.clientHeight);
     },
-  }
+  },
+
+  computed: {
+    wordStyle() {
+      return {'--danmaku-opacity': this.opacity};
+    },
+
+    isParaphrase() {
+      return this.showParaphrase === null ? this.defaultShowParaphrase : this.showParaphrase;
+    },
+  },
 }
 </script>
 
@@ -136,11 +175,11 @@ export default {
 }
 
 .danmaku .word {
-  /* -webkit-app-region: drag; */
+  white-space: nowrap;
   user-select: none;
   border-radius: 10px;
   padding: 8px;
-  opacity: 0.5;
+  opacity: var(--danmaku-opacity);
   transition-duration: 0.3s;
 }
 

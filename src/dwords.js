@@ -1,17 +1,28 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, screen } = require('electron');
 const { getUserDB } = require('./database');
-const ipc = require('./ipc')
+const ipc = require('./ipc');
+const { getSetting, getDanmakuWins } = require('./utils');
 
 function initDWords() {
-    const dwords = {};
+    const dwords = {
+        watchers: {},
+    };
 
     setIPC(dwords);
     setAppEvents();
     createMainWindow();
 
-    dwords.tray = setTray();
-    dwords.danmakuLauncher = setDanmakuLauncher(5000);
-    dwords.danmakuMover = setDanmakuMover(0.1);
+    setTray(dwords);
+    setDanmakuLauncher(dwords);
+    setDanmakuMover(dwords);
+
+    watchSettings(dwords, 'danmakuFrequency', () => setDanmakuLauncher(dwords));
+    watchSettings(dwords, 'danmakuSpeed', () => setDanmakuMover(dwords));
+    watchSettings(dwords, 'externalDictionaries', refreshDanmakus);
+    watchSettings(dwords, 'danmakuTransparency', refreshDanmakus);
+    watchSettings(dwords, 'maxPharaphraseLen', refreshDanmakus);
+    watchSettings(dwords, 'danmakuColor', refreshDanmakus);
+    watchSettings(dwords, 'defaultShowParaphrase', refreshDanmakus);
 
     return dwords;
 }
@@ -77,7 +88,7 @@ function showWindow() {
     }
 }
 
-function setTray() {
+function setTray(dwords) {
     const tray = new Tray('assets/img/logo@2x.png');
     tray.setToolTip('DWords');
     tray.setContextMenu(Menu.buildFromTemplate([
@@ -89,7 +100,7 @@ function setTray() {
         }
     ]));
     tray.on('click', showWindow);
-    return tray;
+    dwords.tray = tray;
 }
 
 function setIPC(dwords) {
@@ -103,8 +114,18 @@ function setIPC(dwords) {
     }
 }
 
-function setDanmakuLauncher(interval) {
-    return setInterval(async () => {
+function refreshDanmakus() {
+    getDanmakuWins().forEach(win => win.webContents.send('refreshDanmaku'));
+}
+
+async function setDanmakuLauncher(dwords) {
+    if (dwords.danmakuLauncher) {
+        clearInterval(dwords.danmakuLauncher);
+    }
+
+    const frequency = await getSetting('danmakuFrequency');
+    dwords.danmakuLauncher = setInterval(async () => {
+    // dwords.danmakuLauncher = setTimeout(async () => {
         const planID = await ipc.getCurrentPlan();
         if (!planID) return;
         const word = await getUserDB().get(`with u as (
@@ -112,14 +133,19 @@ function setDanmakuLauncher(interval) {
             order by time limit ?) select * from u order by random() limit 1`,
             planID, 10);
         if (!word) return;
-        if (!word.color) word.color = 'dark';
+
         createDanmaku(word);
-    }, interval);
+    }, frequency * 1000);
 }
 
-function setDanmakuMover(speed) {
+async function setDanmakuMover(dwords) {
+    if (dwords.danmakuMover) {
+        clearInterval(dwords.danmakuMover);
+    }
+
+    const speed = await getSetting('danmakuSpeed') / 100;
     let last = new Date().valueOf();
-    return setInterval(() => {
+    dwords.danmakuMover = setInterval(() => {
         const now = new Date().valueOf();
         const dis = Math.round((now - last) * speed);
         last = now;
@@ -135,6 +161,24 @@ function setDanmakuMover(speed) {
     }, 20);
 }
 
+function watchSettings(dwords, key, handler) {
+    let handlers = dwords.watchers[key];
+    if (!handlers) {
+        handlers = [];
+        dwords.watchers[key] = handlers;
+    }
+    handlers.push(handler);
+}
+
+function onSettingsUpdate(dwords, settings) {
+    for (const key of settings) {
+        const handlers = dwords.watchers[key];
+        if (handlers) {
+            handlers.forEach(handler => handler());
+        }
+    }
+}
+
 module.exports = {
-    initDWords,
+    initDWords, onSettingsUpdate
 };

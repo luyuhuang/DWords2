@@ -1,5 +1,6 @@
+const { DEFAULT_SETTINGS, DICTIONARIES } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
-const { getWinByWebContentsID, getMainWin } = require("./utils");
+const { getWinByWebContentsID, getMainWin, getSetting } = require("./utils");
 
 
 function close(event) {
@@ -85,10 +86,41 @@ async function setWordStatus(_, word, planID, status) {
 }
 
 async function consultDictionary(_, word) {
-    return await getDictDB().get(`select * from dict_en where word = ?`, word);
+    const id = await getSetting('dictionary');
+    const dict = DICTIONARIES[id]
+    return await getDictDB().get(`select *, ${dict.field} as paraphrase from ${dict.table} where word = ?`, word);
+}
+
+async function getSettings(_, ...keys) {
+    let res, settings
+    if (keys.length > 0) {
+        const ph = '?,'.repeat(keys.length).slice(0, -1);
+        res = await getUserDB().all(`select * from settings where key in (${ph})`, keys);
+        settings = {};
+        for (key of keys) {
+            settings[key] = DEFAULT_SETTINGS[key];
+        }
+    } else {
+        res = await getUserDB().all(`select * from settings`);
+        settings = {...DEFAULT_SETTINGS};
+    }
+
+    for (const {key, value} of res) {
+        settings[key] = JSON.parse(value);
+    }
+    return settings;
+}
+
+async function updateSettings(_, settings) {
+    for (const key in settings) {
+        await getUserDB().run(`insert or replace into settings values (?, ?)`, key, JSON.stringify(settings[key]));
+    }
+    const { onSettingsUpdate } = require('./dwords');
+    onSettingsUpdate(this, Object.keys(settings));
 }
 
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
-    getWords, selectPlan, newPlan, addWord, getWordList, setWordStatus, consultDictionary
+    getWords, selectPlan, newPlan, addWord, getWordList, setWordStatus, consultDictionary,
+    getSettings, updateSettings,
 }

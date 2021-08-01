@@ -1,7 +1,18 @@
 <template>
   <div class="d-flex flex-column" style="width: 100vw">
-    <div class="d-flex p-3 flex-row-reverse" style="-webkit-app-region: drag">
-      <button type="button" class="btn-close" @click="clickClose" style="-webkit-app-region: no-drag"></button>
+    <div class="d-flex flex-row align-items-center p-3" style="-webkit-app-region: drag">
+      <div class="d-flex flex-row justify-content-center col">
+        <div class="input-group input-group-sm" style="width: 17rem; -webkit-app-region: no-drag">
+          <input type="text" class="form-control" placeholder="Search">
+          <button class="btn search-btn">
+            <i class="bi bi-search"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="d-flex flex-row-reverse" style="-webkit-app-region: no-drag">
+        <button type="button" class="btn-close" @click="clickClose"></button>
+      </div>
     </div>
     <table class="table m-0 border-end no-select">
       <thead>
@@ -11,7 +22,10 @@
     <div class="mb-auto" style="overflow-y: auto;">
       <table class="table table-striped table-borderless">
         <tbody ref="tableBody">
-          <tr v-for="(word, i) in wordList" :key="i"> <td>{{ word.word }}</td> <td>{{ word.paraphrase }}</td> </tr>
+          <tr v-for="(word, i) in wordList" :key="i">
+            <td>{{ word.word }}</td>
+            <td>{{ html2text(word.paraphrase) }}</td>
+          </tr>
         </tbody>
       </table>
     </div>
@@ -23,6 +37,7 @@
 </template>
 
 <script>
+import { html2text } from '../scripts/utils';
 const { ipcRenderer } = window.require("electron");
 
 export default {
@@ -40,6 +55,8 @@ export default {
   },
 
   methods: {
+    html2text,
+
     resizeThead() {
       const tbody = this.$refs.tableBody;
       const first = tbody && tbody.children[0];
@@ -54,3 +71,10 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.search-btn {
+  border-color: rgb(206, 212, 218);
+  color: gray;
+}
+</style>

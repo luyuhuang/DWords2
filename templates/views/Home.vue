@@ -1,6 +1,6 @@
 <template>
   <div id="widget" class="d-flex flex-row" style="height: 100vh">
-    <SideBar @on-change-tag="onChangeTab"></SideBar>
+    <SideBar :currentTab="currentTab" @on-change-tag="onChangeTab"></SideBar>
     <Table :wordList="wordList"></Table>
   </div>
 </template>
@@ -14,7 +14,7 @@ export default {
   name: "Home",
   data() {
     return {
-      currentTab: undefined,
+      currentTab: 'Current',
       wordList: [],
     };
   },
@@ -23,6 +23,7 @@ export default {
 
   mounted() {
     ipcRenderer.on('refreshList', () => this.setWordList(this.currentTab));
+    this.setWordList(this.currentTab);
   },
 
   methods: {
