@@ -66,8 +66,11 @@ export default {
 
   methods: {
     async search(word) {
-      this.result = await ipcRenderer.invoke('consultDictionary', word);
-      this.modal.show();
+      const res = await ipcRenderer.invoke('consultDictionary', word);
+      if (res) {
+        this.result = res;
+        this.modal.show();
+      }
     },
 
     async fetchSettings() {
