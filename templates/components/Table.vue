@@ -1,15 +1,7 @@
 <template>
   <div class="d-flex flex-column" style="width: 100vw">
     <div class="d-flex flex-row align-items-center p-3" style="-webkit-app-region: drag">
-      <div class="d-flex flex-row justify-content-center col">
-        <div class="input-group input-group-sm" style="width: 17rem; -webkit-app-region: no-drag">
-          <input type="text" class="form-control" placeholder="Search">
-          <button class="btn search-btn">
-            <i class="bi bi-search"></i>
-          </button>
-        </div>
-      </div>
-
+      <Search></Search>
       <div class="d-flex flex-row-reverse" style="-webkit-app-region: no-drag">
         <button type="button" class="btn-close" @click="clickClose"></button>
       </div>
@@ -37,6 +29,7 @@
 </template>
 
 <script>
+import Search from './Search.vue';
 import { html2text } from '../scripts/utils';
 const { ipcRenderer } = window.require("electron");
 
@@ -45,6 +38,8 @@ export default {
   props: {
     wordList: Array,
   },
+
+  components: {Search},
 
   mounted() {
     const tbody = this.$refs.tableBody;
@@ -71,10 +66,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.search-btn {
-  border-color: rgb(206, 212, 218);
-  color: gray;
-}
-</style>

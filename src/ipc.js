@@ -119,8 +119,15 @@ async function updateSettings(_, settings) {
     onSettingsUpdate(this, Object.keys(settings));
 }
 
+async function getWordsByPrefix(_, prefix) {
+    const id = await getSetting('dictionary');
+    const dict = DICTIONARIES[id]
+    const res = await getDictDB().all(`select word from ${dict.table} where word like ? limit 100`, `${prefix}%`);
+    return res.map(({word}) => word);
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, selectPlan, newPlan, addWord, getWordList, setWordStatus, consultDictionary,
-    getSettings, updateSettings,
+    getSettings, updateSettings, getWordsByPrefix,
 }
