@@ -95,9 +95,11 @@ export default {
     };
   },
 
-  mounted() {
+  created() {
     this.getPlans();
+  },
 
+  mounted() {
     document.addEventListener('keyup', e => {
       if (e.key == 'Escape') {
         this.adding = false;

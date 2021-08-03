@@ -126,8 +126,12 @@ async function getWordsByPrefix(_, prefix) {
     return res.map(({word}) => word);
 }
 
+function toggleDevTools() {
+    getMainWin().webContents.toggleDevTools();
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, selectPlan, newPlan, addWord, getWordList, setWordStatus, consultDictionary,
-    getSettings, updateSettings, getWordsByPrefix,
+    getSettings, updateSettings, getWordsByPrefix, toggleDevTools,
 }

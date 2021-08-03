@@ -21,7 +21,7 @@ export default {
 
   components: {Table, SideBar},
 
-  mounted() {
+  created() {
     ipcRenderer.on('refreshList', () => this.setWordList(this.currentTab));
     this.setWordList(this.currentTab);
   },

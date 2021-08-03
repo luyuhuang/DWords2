@@ -60,6 +60,9 @@ export default {
     };
   },
 
+  updated() {
+  },
+
   props: {
     id: String,
     settings: Object,
@@ -73,6 +76,7 @@ export default {
 
     delExternalDict(i) {
       this.settings.externalDictionaries.splice(i, 1);
+      this.change('externalDictionaries');
     },
 
     change(...keys) {

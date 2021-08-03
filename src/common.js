@@ -12,6 +12,7 @@ exports.DEFAULT_SETTINGS = {
     danmakuSpeed: 10,
     danmakuFrequency: 5,
     danmakuTransparency: 50,
+    danmakuSize: 15,
     defaultShowParaphrase: false,
     maxPharaphraseLen: 16,
     danmakuColor: 'red',

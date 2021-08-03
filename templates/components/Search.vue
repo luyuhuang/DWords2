@@ -15,7 +15,7 @@
       </div>
     </div>
 
-    <div class="modal fade" tabindex="-1" ref="modal">
+    <div class="modal fade" tabindex="-1" ref="modal" style="-webkit-app-region: no-drag">
       <div class="modal-dialog">
         <div class="modal-content">
           <div class="modal-body">

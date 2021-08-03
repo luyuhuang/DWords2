@@ -68,19 +68,22 @@ export default {
       maxPharaphraseLen: 16,
       defaultColor: '',
       opacity: 0.5,
+      wordSize: '15px',
       defaultShowParaphrase: false,
     };
   },
 
-  mounted() {
-    new ResizeObserver(this.updateSize).observe(this.$refs.widget);
-    this.updateSize();
-
+  created() {
     document.addEventListener('mousemove', this.mouseMove);
     document.addEventListener('mouseup', this.mouseUp);
 
     this.fetchSettings();
     ipcRenderer.on('refreshDanmaku', this.fetchSettings);
+  },
+
+  mounted() {
+    new ResizeObserver(this.updateSize).observe(this.$refs.widget);
+    this.updateSize();
   },
 
   methods: {
@@ -95,13 +98,14 @@ export default {
     async fetchSettings() {
       const settings = await ipcRenderer.invoke('getSettings',
         'externalDictionaries', 'danmakuTransparency', 'maxPharaphraseLen',
-        'danmakuColor', 'defaultShowParaphrase');
+        'danmakuColor', 'defaultShowParaphrase', 'danmakuSize');
 
       this.dictionaries = settings.externalDictionaries;
       this.opacity = settings.danmakuTransparency / 100;
       this.maxPharaphraseLen = settings.maxPharaphraseLen;
       this.defaultColor = settings.danmakuColor;
       this.defaultShowParaphrase = settings.defaultShowParaphrase;
+      this.wordSize = settings.danmakuSize + 'px';
     },
 
     mouseDownWord(e) {
@@ -159,7 +163,10 @@ export default {
 
   computed: {
     wordStyle() {
-      return {'--danmaku-opacity': this.opacity};
+      return {
+        '--danmaku-opacity': this.opacity,
+        '--word-size': this.wordSize,
+      };
     },
 
     isParaphrase() {
@@ -177,8 +184,12 @@ export default {
 .danmaku .word {
   white-space: nowrap;
   user-select: none;
-  border-radius: 10px;
-  padding: 8px;
+  border-radius: 0.4em;
+  padding-left: 0.33em;
+  padding-right: 0.33em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
+  font-size: var(--word-size);
   opacity: var(--danmaku-opacity);
   transition-duration: 0.3s;
 }

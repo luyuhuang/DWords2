@@ -20,6 +20,7 @@ function initDWords() {
     watchSettings(dwords, 'danmakuSpeed', () => setDanmakuMover(dwords));
     watchSettings(dwords, 'externalDictionaries', refreshDanmakus);
     watchSettings(dwords, 'danmakuTransparency', refreshDanmakus);
+    watchSettings(dwords, 'danmakuSize', refreshDanmakus);
     watchSettings(dwords, 'maxPharaphraseLen', refreshDanmakus);
     watchSettings(dwords, 'danmakuColor', refreshDanmakus);
     watchSettings(dwords, 'defaultShowParaphrase', refreshDanmakus);

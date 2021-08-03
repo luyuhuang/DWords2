@@ -20,6 +20,12 @@
         v-model="settings.danmakuTransparency" @change="change('danmakuTransparency')">
     </div>
 
+    <div class="mb-2">
+      <span>Size</span>
+      <input type="range" class="form-range"
+        v-model="settings.danmakuSize" @change="change('danmakuSize')">
+    </div>
+
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
         v-model="settings.defaultShowParaphrase" @change="change('defaultShowParaphrase')">
