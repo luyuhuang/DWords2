@@ -1,6 +1,7 @@
-const { DEFAULT_SETTINGS, DICTIONARIES } = require("./common");
+const { DICTIONARIES } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
-const { getWinByWebContentsID, getMainWin, getSetting } = require("./utils");
+const { getWinByWebContentsID, getMainWin } = require("./utils");
+const settings = require('./settings');
 
 
 function close(event) {
@@ -58,16 +59,16 @@ async function addWord(_, planID, word, time, paraphrase) {
 
 async function getWordList(_, tab) {
     const planId = await getCurrentPlan();
-    const currentNum = 10;
+    const maxCurrent = await settings.getSetting('maxCurrent');
     let ans
     switch (tab) {
         case "Current":
             ans = await getUserDB().all(`select * from words where plan_id = ? and status = 0 order by time limit ?`,
-                planId, currentNum);
+                planId, maxCurrent);
             break;
         case "Planning":
             ans = await getUserDB().all(`select * from words where plan_id = ? and status = 0 order by time limit -1 offset ?`,
-                planId, currentNum);
+                planId, maxCurrent);
             break;
         case "Memorized":
             ans = await getUserDB().all(`select * from words where plan_id = ? and status = 1 order by time`,
@@ -80,47 +81,39 @@ async function getWordList(_, tab) {
     return ans;
 }
 
-async function setWordStatus(_, word, planID, status) {
-    await getUserDB().run(`update words set status = ? where word = ? and plan_id = ?`, status, word, planID);
-    getMainWin().webContents.send("refreshList");
+async function updateWord(_, word) {
+    const fields = [];
+    const values = [];
+    for (field in word) {
+        if (field !== 'word' && field !== 'plan_id') {
+            fields.push(`${field} = ?`);
+            values.push(word[field]);
+        }
+    }
+    await getUserDB().run(`update words set ${fields.join(', ')} where word = ? and plan_id = ?`,
+        ...values, word.word, word.plan_id);
+
+    if ('status' in word) {
+        getMainWin().webContents.send('refreshList');
+    }
 }
 
 async function consultDictionary(_, word) {
-    const id = await getSetting('dictionary');
+    const id = await settings.getSetting('dictionary');
     const dict = DICTIONARIES[id]
     return await getDictDB().get(`select *, ${dict.field} as paraphrase from ${dict.table} where word = ?`, word);
 }
 
 async function getSettings(_, ...keys) {
-    let res, settings
-    if (keys.length > 0) {
-        const ph = '?,'.repeat(keys.length).slice(0, -1);
-        res = await getUserDB().all(`select * from settings where key in (${ph})`, keys);
-        settings = {};
-        for (key of keys) {
-            settings[key] = DEFAULT_SETTINGS[key];
-        }
-    } else {
-        res = await getUserDB().all(`select * from settings`);
-        settings = {...DEFAULT_SETTINGS};
-    }
-
-    for (const {key, value} of res) {
-        settings[key] = JSON.parse(value);
-    }
-    return settings;
+    return await settings.getSettings(...keys);
 }
 
-async function updateSettings(_, settings) {
-    for (const key in settings) {
-        await getUserDB().run(`insert or replace into settings values (?, ?)`, key, JSON.stringify(settings[key]));
-    }
-    const { onSettingsUpdate } = require('./dwords');
-    onSettingsUpdate(this, Object.keys(settings));
+async function updateSettings(_, s) {
+    return await settings.updateSettings(this, s);
 }
 
 async function getWordsByPrefix(_, prefix) {
-    const id = await getSetting('dictionary');
+    const id = await settings.getSetting('dictionary');
     const dict = DICTIONARIES[id]
     const res = await getDictDB().all(`select word from ${dict.table} where word like ? limit 100`, `${prefix}%`);
     return res.map(({word}) => word);
@@ -132,6 +125,6 @@ function toggleDevTools() {
 
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
-    getWords, selectPlan, newPlan, addWord, getWordList, setWordStatus, consultDictionary,
+    getWords, selectPlan, newPlan, addWord, getWordList, updateWord, consultDictionary,
     getSettings, updateSettings, getWordsByPrefix, toggleDevTools,
 }

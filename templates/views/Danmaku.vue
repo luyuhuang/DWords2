@@ -21,7 +21,7 @@
       <div class="d-flex flex-column">
         <div class="d-flex justify-content-evenly">
           <div v-for="(c, i) in colors" :key="i">
-            <input class="radio" type="radio" name="color" :id="'radio-' + c" :value="c" hidden v-model="color"/>
+            <input class="radio" type="radio" name="color" :id="'radio-' + c" :value="c" hidden v-model="color" @change="clickColor"/>
             <label :for="'radio-' + c" class="radio" :class="c"></label>
           </div>
         </div>
@@ -53,7 +53,7 @@ export default {
       word: urlParams.get('word'),
       planID: Number(urlParams.get('plan_id')),
       paraphrase: urlParams.get('paraphrase'),
-      showParaphrase: show_paraphrase ? show_paraphrase === 'true' : null,
+      showParaphrase: show_paraphrase ? show_paraphrase === '1' : null,
       status: Number(urlParams.get('status')),
       color: urlParams.get('color'),
       activated: false,
@@ -138,7 +138,7 @@ export default {
 
     clickMemorized() {
       this.status = this.status === 1 ? 0 : 1;
-      ipcRenderer.invoke('setWordStatus', this.word, this.planID, this.status);
+      ipcRenderer.invoke('updateWord', {word: this.word, plan_id: this.planID, status: this.status});
     },
 
     pronounce(e) {
@@ -153,6 +153,11 @@ export default {
 
     toggleParaphrase() {
       this.showParaphrase = !this.isParaphrase;
+      ipcRenderer.invoke('updateWord', {word: this.word, plan_id: this.planID, show_paraphrase: this.showParaphrase});
+    },
+
+    async clickColor() {
+      ipcRenderer.invoke('updateWord', {word: this.word, plan_id: this.planID, color: this.color});
     },
 
     updateSize() {
