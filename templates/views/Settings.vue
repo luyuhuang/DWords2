@@ -47,6 +47,8 @@ export default {
     this.scrollSpy = new ScrollSpy(this.$refs.setting, {
       target: this.$refs.catalog,
     });
+
+    this.$on('onModifyDOM', () => this.scrollSpy.refresh());
   },
 
   updated() {

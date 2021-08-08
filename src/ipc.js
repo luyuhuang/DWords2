@@ -44,17 +44,53 @@ async function selectPlan(_, planID) {
     await getUserDB().run(`insert or replace into sys values ('currentPlan', ?)`, planID);
 }
 
-async function newPlan(_, name) {
-    const st = await getUserDB().run(`insert into plans (name) values (?)`, name);
+const planInitializers = {
+    async library(id, plan) {
+        const dict = DICTIONARIES[plan.dict];
+        const tag = `%${plan.tag}%`;
+        const words = await getDictDB().all(`
+            select word, row_number() over () as time, ${dict.field} as paraphrase
+            from ${dict.table} where tag like ? order by ${plan.order}`, tag);
+
+        for ({word, time, paraphrase} of words) {
+            await getUserDB().run(`insert into words (plan_id, word, time, paraphrase) values (?, ?, ?, ?)`,
+                id, word, time, paraphrase);
+        }
+    },
+};
+
+async function newPlan(_, plan) {
+    const st = await getUserDB().run(`insert into plans (name) values (?)`, plan.name);
+    const planID = st.lastID;
     if (!await getCurrentPlan()) {
-        await selectPlan(_, st.lastID);
+        await selectPlan(_, planID);
     }
-    return st.lastID;
+
+    const init = planInitializers[plan.type];
+    if (init) {
+        await init(planID, plan);
+    }
+
+    return planID;
+}
+
+async function renamePlan(_, id, name) {
+    await getUserDB().run(`update plans set name = ? where id = ?`, name, id);
+}
+
+async function delPlan(_, id) {
+    await getUserDB().run(`delete from plans where id = ?`, id);
+    await getUserDB().run(`delete from words where plan_id = ?`, id);
+    if (await getCurrentPlan() === id) {
+        const newPlan = await getUserDB().get(`select id from plans order by id desc limit 1`);
+        await selectPlan(_, newPlan.id);
+    }
 }
 
 async function addWord(_, planID, word, time, paraphrase) {
-    await getUserDB().run(`insert or ignore into words (plan_id, word, time, paraphrase) values (?, ?, ?, ?)`,
+    const st = await getUserDB().run(`insert or ignore into words (plan_id, word, time, paraphrase) values (?, ?, ?, ?)`,
         planID, word, time, paraphrase);
+    return st.changes;
 }
 
 async function getWordList(_, tab) {
@@ -82,11 +118,20 @@ async function getWordList(_, tab) {
 }
 
 async function updateWord(_, word) {
+    if (word.newWord) {
+        const w = await getUserDB().get(`select word from words where plan_id = ? and word = ?`,
+            word.plan_id, word.newWord);
+        if (w) {
+            return 'duplicated-new-word';
+        }
+    }
+
     const fields = [];
     const values = [];
-    for (field in word) {
+    for (let field in word) {
         if (field !== 'word' && field !== 'plan_id') {
-            fields.push(`${field} = ?`);
+            let f = field === 'newWord' ? 'word' : field;
+            fields.push(`${f} = ?`);
             values.push(word[field]);
         }
     }
@@ -96,6 +141,10 @@ async function updateWord(_, word) {
     if ('status' in word) {
         getMainWin().webContents.send('refreshList');
     }
+}
+
+async function delWord(_, planID, word) {
+    await getUserDB().run(`delete from words where plan_id = ? and word = ?`, planID, word);
 }
 
 async function consultDictionary(_, word) {
@@ -125,6 +174,7 @@ function toggleDevTools() {
 
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
-    getWords, selectPlan, newPlan, addWord, getWordList, updateWord, consultDictionary,
-    getSettings, updateSettings, getWordsByPrefix, toggleDevTools,
+    getWords, selectPlan, newPlan, renamePlan, delPlan, addWord, getWordList,
+    updateWord, delWord, consultDictionary, getSettings, updateSettings, getWordsByPrefix,
+    toggleDevTools,
 }

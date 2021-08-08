@@ -12,7 +12,10 @@
 
     <div class="align-self-start card mt-2" style="width: 18rem;" v-if="activated">
       <div class="card-body">
-        <h5> {{ word }} <a @click="pronounce" class="bi bi-volume-up pronounce" href="#"></a> </h5>
+        <div v-if="phonetic">
+          [{{ phonetic }}]
+          <a @click="pronounce" class="bi bi-volume-up pronounce" href="#"></a>
+        </div>
         <p v-html="paraphrase"></p>
         <div v-for="(dict, i) in dictionaries" :key="i">
           <a @click="clickDictionary" href="#" :index="i"> {{ dict.name }} </a>
@@ -51,6 +54,7 @@ export default {
     const show_paraphrase = urlParams.get('show_paraphrase');
     return {
       word: urlParams.get('word'),
+      phonetic: urlParams.get('phonetic'),
       planID: Number(urlParams.get('plan_id')),
       paraphrase: urlParams.get('paraphrase'),
       showParaphrase: show_paraphrase ? show_paraphrase === '1' : null,
@@ -213,6 +217,8 @@ export default {
 
 .pronounce {
   color: #6c757d;
+  font-size: 1.2rem;
+  vertical-align: middle;
 }
 
 .pronounce:hover {

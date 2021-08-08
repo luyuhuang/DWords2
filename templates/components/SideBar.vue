@@ -21,7 +21,7 @@
         </a>
         <ul class="dropdown-menu text-small shadow" aria-labelledby="dropdownUser2">
           <li><a class="dropdown-item" href="#/plans"><i class="bi bi-journals me-2"></i>Plans</a></li>
-          <li><a class="dropdown-item" href="#/statistics"><i class="bi bi-bar-chart-line me-2"></i>Statistics</a></li>
+          <!-- <li><a class="dropdown-item" href="#/statistics"><i class="bi bi-bar-chart-line me-2"></i>Statistics</a></li> -->
           <li><a class="dropdown-item" href="#/settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
           <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>About</a></li>
           <li><hr class="dropdown-divider"></li>

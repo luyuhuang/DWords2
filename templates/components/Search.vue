@@ -21,7 +21,10 @@
           <div class="modal-body">
             <button type="button" class="btn-close close-modal" data-bs-dismiss="modal"></button>
             <h4>{{ result.word }}</h4>
-            <p>[{{ result.phonetic }}]<a @click="pronounce" class="bi bi-volume-up pronounce" href="#"></a></p>
+            <p v-if="result.phonetic">
+              [{{ result.phonetic }}]
+              <a @click="pronounce" class="bi bi-volume-up pronounce" href="#"></a>
+            </p>
             <p v-html="result.paraphrase"></p>
 
             <div v-for="(dict, i) in dictionaries" :key="i">
@@ -129,6 +132,7 @@ export default {
 .pronounce {
   color: #6c757d;
   font-size: 1.2rem;
+  vertical-align: middle;
 }
 
 .pronounce:hover {

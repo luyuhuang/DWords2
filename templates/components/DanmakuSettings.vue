@@ -3,39 +3,39 @@
     <h3 :id="id">Danmaku</h3>
 
     <div class="mb-2">
-      <span>Speed</span>
-      <input type="range" class="form-range"
-        v-model="settings.danmakuSpeed" @change="change('danmakuSpeed')">
+      <span>Speed: {{ settings.danmakuSpeed }}</span>
+      <input type="range" class="form-range" min="5" max="30" step="0.1"
+        v-model.number="settings.danmakuSpeed" @change="change('danmakuSpeed')">
     </div>
 
     <div class="mb-2">
-      <span>Frequency</span>
-      <input type="range" class="form-range"
-        v-model="settings.danmakuFrequency" @change="change('danmakuFrequency')">
+      <span>Frequency: per {{ settings.danmakuFrequency }}s</span>
+      <input type="range" class="form-range" min="2" max="15" step="0.1"
+        v-model.number="settings.danmakuFrequency" @change="change('danmakuFrequency')">
     </div>
 
     <div class="mb-2">
-      <span>Transparency</span>
-      <input type="range" class="form-range"
-        v-model="settings.danmakuTransparency" @change="change('danmakuTransparency')">
+      <span>Transparency: {{ settings.danmakuTransparency / 100 }}</span>
+      <input type="range" class="form-range" min="10" max="100"
+        v-model.number="settings.danmakuTransparency" @change="change('danmakuTransparency')">
     </div>
 
     <div class="mb-2">
-      <span>Size</span>
-      <input type="range" class="form-range"
-        v-model="settings.danmakuSize" @change="change('danmakuSize')">
+      <span>Size: {{ settings.danmakuSize }}</span>
+      <input type="range" class="form-range" min="10" max="50"
+        v-model.number="settings.danmakuSize" @change="change('danmakuSize')">
     </div>
 
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
-        v-model="settings.defaultShowParaphrase" @change="change('defaultShowParaphrase')">
+        v-model.number="settings.defaultShowParaphrase" @change="change('defaultShowParaphrase')">
       <label class="form-check-label">Default show paraphrase</label>
     </div>
 
     <div class="mb-2">
       <span class="form-label">Paraphrase length limit</span>
       <input type="number" min="3" max="99" class="form-control form-control-sm"
-        v-model="settings.maxPharaphraseLen" @change="change('maxPharaphraseLen')">
+        v-model.number="settings.maxPharaphraseLen" @change="change('maxPharaphraseLen')">
     </div>
 
     <div class="mb-2">

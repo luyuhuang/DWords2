@@ -9,16 +9,41 @@ exports.DEFAULT_SETTINGS = {
         },
     ],
 
-    danmakuSpeed: 10,
-    danmakuFrequency: 5,
-    danmakuTransparency: 50,
-    danmakuSize: 15,
+    danmakuSpeed: 12,
+    danmakuFrequency: 7,
+    danmakuTransparency: 60,
+    danmakuSize: 18,
     defaultShowParaphrase: false,
     maxPharaphraseLen: 16,
-    danmakuColor: 'red',
+    danmakuColor: 'dark',
 };
 
 exports.DICTIONARIES = {
-    'en-en': {name: 'English-English', table: 'dict_en', field: 'paraphrase_en'},
-    'en-zh': {name: 'English-Chinese', table: 'dict_en', field: 'paraphrase_zh'},
+    'en-en': {
+        name: 'English-English',
+        table: 'dict_en',
+        field: 'paraphrase_en',
+        tags: {
+            gre: "GRE",
+            toefl: "TOEFL",
+            cet4: "CET-4",
+            cet6: "CET-6",
+            ielts: "IELTS",
+        },
+    },
+    'en-zh': {
+        name: 'English-Chinese',
+        table: 'dict_en',
+        field: 'paraphrase_zh',
+        tags: {
+            zk: "中考",
+            gk: "高考",
+            ky: "考研",
+            cet4: "大学英语四级",
+            cet6: "大学英语六级",
+            gre: "GRE",
+            toefl: "托福",
+            ielts: "雅思",
+        }
+    },
 };

@@ -1,6 +1,6 @@
 const { BrowserWindow, screen } = require("electron");
 const { getUserDB } = require("./database");
-const { getCurrentPlan } = require("./ipc");
+const { getCurrentPlan, consultDictionary } = require("./ipc");
 const { watchSettings, getSetting } = require("./settings");
 const { getDanmakuWins } = require("./utils");
 
@@ -30,6 +30,7 @@ async function createDanmaku(word) {
         alwaysOnTop: true,
         frame: false,
         transparent: true,
+        // roundedCorners: false,
         backgroundColor: '#00ffffff',
         hasShadow: false,
         alwaysOnTop: true,
@@ -78,6 +79,11 @@ async function launchDanmaku(dwords) {
         order by random() limit 1`,
         planID, maxCurrent, ...dwords.currentDanmakus);
     if (!word) return;
+
+    const res = await consultDictionary(null, word.word);
+    if (res) {
+        word.phonetic = res.phonetic;
+    }
 
     dwords.currentDanmakus.add(word.word);
     createDanmaku(word);

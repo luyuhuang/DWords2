@@ -12,7 +12,7 @@
     <div class="mb-3">
       <span class="form-label">Maximum current words</span>
       <input type="number" min="1" max="999" class="form-control form-control-sm"
-        v-model="settings.maxCurrent" @change="change('maxCurrent')">
+        v-model.number="settings.maxCurrent" @change="change('maxCurrent')">
     </div>
 
     <div class="mb-4 form-check form-switch">
@@ -72,11 +72,13 @@ export default {
     addExternalDict() {
       this.settings.externalDictionaries.push({name: '', url: ''});
       this.change('externalDictionaries');
+      this.$nextTick(() => this.$parent.$emit('onModifyDOM'));
     },
 
     delExternalDict(i) {
       this.settings.externalDictionaries.splice(i, 1);
       this.change('externalDictionaries');
+      this.$nextTick(() => this.$parent.$emit('onModifyDOM'));
     },
 
     change(...keys) {
