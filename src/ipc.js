@@ -1,7 +1,8 @@
 const { DICTIONARIES } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
-const { getWinByWebContentsID, getMainWin } = require("./utils");
+const { getWinByWebContentsID, getMainWin, getSys, setSys } = require("./utils");
 const settings = require('./settings');
+const { synchronize } = require("./sync");
 
 
 function close(event) {
@@ -32,8 +33,7 @@ async function getPlans() {
 }
 
 async function getCurrentPlan() {
-    const res = await getUserDB().get(`select value from sys where key = 'currentPlan'`);
-    return res && Number(res.value);
+    return await getSys('currentPlan');
 }
 
 async function getWords(_, planID) {
@@ -41,7 +41,7 @@ async function getWords(_, planID) {
 }
 
 async function selectPlan(_, planID) {
-    await getUserDB().run(`insert or replace into sys values ('currentPlan', ?)`, planID);
+    await setSys('currentPlan', planID);
 }
 
 const planInitializers = {
@@ -52,9 +52,11 @@ const planInitializers = {
             select word, row_number() over () as time, ${dict.field} as paraphrase
             from ${dict.table} where tag like ? order by ${plan.order}`, tag);
 
+        const now = Date.now();
         for ({word, time, paraphrase} of words) {
-            await getUserDB().run(`insert into words (plan_id, word, time, paraphrase) values (?, ?, ?, ?)`,
-                id, word, time, paraphrase);
+            await getUserDB().run(`insert into words
+                (plan_id, word, time, paraphrase, version) values (?, ?, ?, ?, ?)`,
+                id, word, time, paraphrase, now);
         }
     },
 };
@@ -88,8 +90,9 @@ async function delPlan(_, id) {
 }
 
 async function addWord(_, planID, word, time, paraphrase) {
-    const st = await getUserDB().run(`insert or ignore into words (plan_id, word, time, paraphrase) values (?, ?, ?, ?)`,
-        planID, word, time, paraphrase);
+    const st = await getUserDB().run(`insert or ignore into words
+        (plan_id, word, time, paraphrase, version) values (?, ?, ?, ?, ?)`,
+        planID, word, time, paraphrase, time);
     return st.changes;
 }
 
@@ -126,9 +129,10 @@ async function updateWord(_, word) {
         }
     }
 
+    word.version = Date.now();
     const fields = [];
     const values = [];
-    for (let field in word) {
+    for (const field in word) {
         if (field !== 'word' && field !== 'plan_id') {
             let f = field === 'newWord' ? 'word' : field;
             fields.push(`${f} = ?`);
@@ -172,9 +176,13 @@ function toggleDevTools() {
     getMainWin().webContents.toggleDevTools();
 }
 
+function sync() {
+    synchronize().catch(err => console.error(err));
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, selectPlan, newPlan, renamePlan, delPlan, addWord, getWordList,
     updateWord, delWord, consultDictionary, getSettings, updateSettings, getWordsByPrefix,
-    toggleDevTools,
+    toggleDevTools, sync,
 }

@@ -286,7 +286,7 @@ export default {
     },
 
     async addWord() {
-      const now = new Date().getTime();
+      const now = Date.now();
       const change = await ipcRenderer.invoke('addWord', this.selectedPlan, this.inputedWord, now, this.inputedParaphrase);
       if (change) {
         await this.getWords();

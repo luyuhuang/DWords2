@@ -7,6 +7,7 @@
   "main": "src/main.js",
   "scripts": {
     "start": "vue-cli-service build && electron .",
+    "launch": "electron .",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build"
   },
@@ -24,6 +25,7 @@
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "vue": "^2.6.14",
-    "vue-router": "^3.5.2"
+    "vue-router": "^3.5.2",
+    "webdav": "^4.6.0"
   }
 }

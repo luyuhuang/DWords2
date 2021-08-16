@@ -22,7 +22,7 @@
       </table>
     </div>
     <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
-      <button type="button" class="btn btn-primary me-2">Light</button>
+      <button type="button" class="btn btn-primary me-2" @click="clickSync">Sync</button>
       <button type="button" class="btn btn-primary me-2">Burst</button>
     </div>
   </div>
@@ -63,6 +63,10 @@ export default {
     clickClose() {
       ipcRenderer.send('close');
     },
+
+    clickSync() {
+      ipcRenderer.send('sync');
+    }
   },
 }
 </script>

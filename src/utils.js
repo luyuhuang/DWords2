@@ -1,4 +1,10 @@
-const { BrowserWindow } = require("electron");
+const { BrowserWindow } = require('electron');
+const { readFile } = require('fs/promises');
+const { getUserDB } = require('./database');
+
+function wait(t) {
+    return new Promise(resolve => setTimeout(resolve, t));
+}
 
 function getWinByWebContentsID(id) {
     return BrowserWindow.getAllWindows().find(win => win.webContents.id === id)
@@ -12,6 +18,97 @@ function getDanmakuWins() {
     return BrowserWindow.getAllWindows().filter(win => win.getTitle().startsWith('Danmaku'));
 }
 
+function toCSV(fields, list) {
+    return list.map(entry => fields.map(field => {
+        let value = entry[field] === null || entry[field] === undefined ?
+            '' : JSON.stringify(entry[field]);
+        if (value.search(/[,"\r\n]/) >= 0) {
+            value = value.replace(/"/g, '""');
+            value = '"' + value + '"';
+        }
+        return value;
+    }).join(',')).join('\n');
+}
+
+function parseCSVField(csv, i) {
+    if (csv[i] === '"') {
+        ++i;
+        let j = i, ans = '';
+        do {
+            while (i < csv.length && csv[i] !== '"') {
+                ++i;
+            }
+            ans += csv.substr(j, i - j);
+            while (i + 1 < csv.length && csv[i] === '"' && csv[i+1] === '"') {
+                ans += '"';
+                j = (i += 2);
+            }
+        } while (i < csv.length && csv[i] !== '"');
+
+        if (i >= csv.length || csv[i] !== '"') {
+            throw new Error(`invalid CSV: unclosed quote at ${i}`);
+        }
+        ++i;
+        if (i < csv.length && csv[i] !== ',' && csv[i] !== '\n') {
+            throw Error(`invalid CSV: except ',' at ${i}`);
+        }
+        return [ans, i];
+    } else {
+        let j = i;
+        while (i < csv.length && csv[i] !== ',' && csv[i] !== '\n') {
+            ++i;
+        }
+        return [csv.substr(j, i - j), i];
+    }
+}
+
+function* parseCSV(fields, csv) {
+    for (let i = 0; i < csv.length; ++i) {
+        const obj = {};
+        let index = 0;
+        while (i < csv.length && csv[i] !== '\n') {
+            const [value, j] = parseCSVField(csv, i);
+            obj[fields[index++]] = value ? JSON.parse(value) : null;
+            i = j;
+            if (i < csv.length && csv[i] === ',') {
+                ++i;
+                if (i >= csv.length || csv[i] == '\n') {
+                    obj[fields[index++]] = null;
+                }
+            }
+        }
+        yield obj;
+    }
+}
+
+async function currentVersion() {
+    const data = await readFile('package.json', {encoding: 'utf8'});
+    return JSON.parse(data.toString()).version;
+}
+
+function compareVersions(v1, v2) {
+    const a1 = v1.split('.')
+    const a2 = v2.split('.')
+    const N = Math.max(a1.length, a2.length);
+    for (let i = 0; i < N; ++i) {
+        const d = Number(a1[i] || 0) - Number(a2[i] || 0);
+        if (d !== 0) {
+            return d;
+        }
+    }
+    return 0;
+}
+
+async function getSys(key) {
+    const res = await getUserDB().get(`select value from sys where key = ?`, key);
+    return res && JSON.parse(res.value);
+}
+
+async function setSys(key, value) {
+    await getUserDB().run(`insert or replace into sys values (?, ?)`, key, JSON.stringify(value));
+}
+
 module.exports = {
-    getWinByWebContentsID, getMainWin, getDanmakuWins,
+    getWinByWebContentsID, getMainWin, getDanmakuWins, toCSV, parseCSV, wait,
+    currentVersion, compareVersions, getSys, setSys,
 }

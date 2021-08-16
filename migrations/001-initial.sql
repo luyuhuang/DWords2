@@ -20,6 +20,7 @@ create table words (
     show_paraphrase bool,
     color varchar(32),
     status integer not null default 0,
+    version integer not null default 0,
     primary key (plan_id, word)
 );
 
@@ -30,6 +31,12 @@ create table settings (
     value text not null
 );
 
+create table sync (
+    plan_id integer primary key,
+    version varchar(255),
+    sequence integer not null
+);
+
 --------------------------------------------------------------------------------
 -- Down
 --------------------------------------------------------------------------------
@@ -38,3 +45,4 @@ drop table sys;
 drop table plans;
 drop table words;
 drop table settings;
+drop table sync;

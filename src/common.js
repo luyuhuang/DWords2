@@ -1,3 +1,6 @@
+const os = require('os');
+const path = require('path');
+
 exports.DEFAULT_SETTINGS = {
     dictionary: 'en-en',
     maxCurrent: 10,
@@ -47,3 +50,5 @@ exports.DICTIONARIES = {
         }
     },
 };
+
+exports.DATA_DIR = path.join(os.homedir(), '.DWords2');
