@@ -85,7 +85,7 @@ async function delPlan(_, id) {
     await getUserDB().run(`delete from words where plan_id = ?`, id);
     if (await getCurrentPlan() === id) {
         const newPlan = await getUserDB().get(`select id from plans order by id desc limit 1`);
-        await selectPlan(_, newPlan.id);
+        await selectPlan(_, newPlan ? newPlan.id : null);
     }
 }
 
@@ -176,8 +176,13 @@ function toggleDevTools() {
     getMainWin().webContents.toggleDevTools();
 }
 
-function sync() {
-    synchronize().catch(err => console.error(err));
+async function sync() {
+    try {
+        await synchronize(this);
+    } catch(e) {
+        console.log('sync err', e);
+        return e;
+    }
 }
 
 module.exports = {

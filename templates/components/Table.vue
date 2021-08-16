@@ -22,14 +22,20 @@
       </table>
     </div>
     <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
-      <button type="button" class="btn btn-primary me-2" @click="clickSync">Sync</button>
+      <button type="button" class="btn btn-primary me-2" @click="clickSync">
+        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="syncing"></span>
+        {{ syncing ? 'Syncing...' : 'Sync' }}
+      </button>
       <button type="button" class="btn btn-primary me-2">Burst</button>
     </div>
+
+    <Toast></Toast>
   </div>
 </template>
 
 <script>
 import Search from './Search.vue';
+import Toast from '../components/Toast.vue'
 import { html2text } from '../scripts/utils';
 const { ipcRenderer } = window.require("electron");
 
@@ -39,7 +45,13 @@ export default {
     wordList: Array,
   },
 
-  components: {Search},
+  components: {Search, Toast},
+
+  data() {
+    return {
+      syncing: false,
+    };
+  },
 
   mounted() {
     const tbody = this.$refs.tableBody;
@@ -64,8 +76,16 @@ export default {
       ipcRenderer.send('close');
     },
 
-    clickSync() {
-      ipcRenderer.send('sync');
+    async clickSync() {
+      if (this.syncing) {
+        return;
+      }
+      this.syncing = true;
+      const err = await ipcRenderer.invoke('sync');
+      if (err) {
+        this.$emit('showToast', {content: err, delay: 3000});
+      }
+      this.syncing = false;
     }
   },
 }

@@ -2,9 +2,15 @@ const { createClient } = require('webdav');
 const { getUserDB } = require('./database');
 const { wait, compareVersions, parseCSV, getSys, toCSV, setSys } = require('./utils');
 const migrateCloud = require('./migrateCloud');
+const { getSettings } = require('./settings');
 
 const lockPath = key => `/.lock-${key}`;
-const planPath = id => `/plans/${id}`;
+const wordsPath = id => `/words/${id}`;
+
+function initSync(dwords) {
+    dwords.syncing = false;
+    dwords.migrated = false;
+}
 
 async function lock(dav, key, timeout=Infinity) {
     const path = lockPath(key);
@@ -15,7 +21,7 @@ async function lock(dav, key, timeout=Infinity) {
         timeout -= Date.now() - now;
     }
     if (timeout <= 0) {
-        throw Error(`Timeout when locking ${key}`);
+        throw Error(`Timeout when locking ${key}, try again latter.`);
     }
 }
 
@@ -30,6 +36,7 @@ function withLock(dav, key, timeout, fn) {
 }
 
 async function migrate(dav) {
+    console.log('migrate cloud...')
     let version = '0'
     try {
         version = await dav.getFileContents('/version', {format: 'text'});
@@ -40,9 +47,15 @@ async function migrate(dav) {
     }
 
     const versions = Object.keys(migrateCloud).sort(compareVersions);
+    if (compareVersions(version, versions[versions.length - 1]) >= 0) {
+        console.log('cloud up to date')
+        return;
+    }
+
     await withLock(dav, 'migrate', 10000, async () => {
         for (const v of versions) {
             if (compareVersions(v, version) > 0) {
+                console.log('migrate cloud version: %s', v);
                 await migrateCloud[v](dav);
             }
         }
@@ -52,7 +65,8 @@ async function migrate(dav) {
 
 const dataFields = ['word', 'time', 'paraphrase', 'show_paraphrase', 'color', 'status', 'version'];
 async function pullFullData(dav, plan, version) {
-    const path = `${planPath(plan.id)}/data.csv`;
+    console.log('pull full data...')
+    const path = `${wordsPath(plan.id)}/data.csv`;
     const data = await dav.getFileContents(path, {format: 'text'});
     for (const row of parseCSV(dataFields, data)) {
         await updateWord(row, plan.id);
@@ -80,12 +94,14 @@ async function updateWord(word, planID) {
 }
 
 async function pullIncrements(dav, plan, increments) {
+    console.log('pull increments...');
     const index = [...increments.keys()].sort();
     let num = 0;
     const sequence = await planSequence(plan.id);
     for (const i of index) {
         const increment = increments.get(i);
         if (num + increment.num > sequence) {
+            console.log('pull increment %s', increment.path);
             const data = await dav.getFileContents(increment.path, {format: 'text'});
             const records = [...parseCSV(dataFields, data)];
             for (let i = 0; i < records.length; ++i) {
@@ -111,17 +127,20 @@ function calc_increment_num(words, increments) {
 }
 
 async function pushIncrements(dav, plan, increments, words) {
+    console.log('push increments...');
     let i = 0, n = 0;
     if (increments.size > 0) {
         n = Math.max(...increments.keys());
         const increment = increments.get(n);
+        console.log('update increment %s', increment.path);
+
         let records = increment.records;
         if (!records) {
             const data = await dav.getFileContents(increment.path, {format: 'text'});
             records = [...parseCSV(dataFields, data)];
         }
 
-        while (i < words.length && records.length < INCREMENT_CAPACITY) {
+        while (i < words.length && records.length < increment.num) {
             records.push(words[i++]);
         }
 
@@ -133,7 +152,8 @@ async function pushIncrements(dav, plan, increments, words) {
         while (i < words.length && records.length < INCREMENT_CAPACITY) {
             records.push(words[i++]);
         }
-        const path = `${planPath(plan.id)}/increment.${INCREMENT_CAPACITY}.${++n}.csv`;
+        const path = `${wordsPath(plan.id)}/increment.${INCREMENT_CAPACITY}.${++n}.csv`;
+        console.log('new increment %s', path);
         await dav.putFileContents(path, toCSV(dataFields, records));
     }
 
@@ -141,7 +161,8 @@ async function pushIncrements(dav, plan, increments, words) {
 }
 
 async function pushFullData(dav, plan, increments) {
-    const path = `${planPath(plan.id)}/data.csv`;
+    console.log('push full data');
+    const path = `${wordsPath(plan.id)}/data.csv`;
     const words = await getUserDB().all(`select * from words where plan_id = ?`, plan.id);
     await dav.putFileContents(path, toCSV(dataFields, words), {overwrite: true});
     await Promise.all([...increments.values()].map(inc => dav.deleteFile(inc.path)));
@@ -168,8 +189,9 @@ async function planSequence(id) {
     return res.sequence;
 }
 
-async function syncPlan(dav, plan) {
-    const path = planPath(plan.id);
+async function syncWords(dav, plan) {
+    console.log('sync words, plan: %s', plan.id);
+    const path = wordsPath(plan.id);
     const syncVersion = await getSys('syncVersion') || 0;
     const words = await getUserDB().all(`select * from words where plan_id = ? and version > ?`,
         plan.id, syncVersion);
@@ -195,36 +217,56 @@ async function syncPlan(dav, plan) {
             }
         }
 
+        // pull
         const version = await planVersion(plan.id);
         if (cloudVersion && cloudVersion !== version) {
             await pullFullData(dav, plan, cloudVersion);
         }
         await pullIncrements(dav, plan, increments);
 
-        if (calc_increment_num(words, increments) <= INCREMENT_NUM) {
-            await pushIncrements(dav, plan, increments, words);
-        } else {
-            await pushFullData(dav, plan, increments);
+        // push
+        if (words.length > 0) {
+            if (calc_increment_num(words, increments) <= INCREMENT_NUM) {
+                await pushIncrements(dav, plan, increments, words);
+            } else {
+                await pushFullData(dav, plan, increments);
+            }
         }
 
         await setSys('syncVersion', Date.now());
     });
 }
 
-async function synchronize() {
-    const dav = createClient('', {
-        username: '',
-        password: ''
-    });
+async function synchronize(dwords) {
+    if (dwords.syncing) {
+        return;
+    }
+    dwords.syncing = true;
 
-    // await migrate(dav);
+    try {
+        console.log('synchronizing...');
 
-    const plans = await getUserDB().all(`select * from plans`);
-    await Promise.all(plans.map(plan => syncPlan(dav, plan)));
+        const {syncURL, username, password} = await getSettings('syncURL', 'username', 'password');
+        if (!syncURL || !username || !password) {
+            throw Error(`syncURL, username and password must be set`);
+        }
 
-    console.log(`synchronize done`);
+        const dav = createClient(syncURL, {username, password});
+
+        if (!dwords.migrate) {
+            await migrate(dav);
+            dwords.migrate = true;
+        }
+
+        const plans = await getUserDB().all(`select * from plans`);
+        await Promise.all(plans.map(plan => syncWords(dav, plan)));
+
+        console.log(`synchronize done`);
+    } finally {
+        dwords.syncing = false;
+    }
 }
 
 module.exports = {
-    synchronize,
+    initSync, synchronize,
 }

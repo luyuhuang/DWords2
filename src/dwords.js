@@ -2,12 +2,14 @@ const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const { initDanmaku } = require('./danmaku');
 const ipc = require('./ipc');
 const { initSettings, watchSettings } = require('./settings');
+const { initSync } = require('./sync');
 const { getMainWin } = require('./utils');
 
 function initDWords() {
     const dwords = {};
 
     initSettings(dwords);
+    initSync(dwords);
     setIPC(dwords);
     setAppEvents();
     createMainWindow();

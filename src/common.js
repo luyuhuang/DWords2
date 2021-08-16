@@ -19,6 +19,11 @@ exports.DEFAULT_SETTINGS = {
     defaultShowParaphrase: false,
     maxPharaphraseLen: 16,
     danmakuColor: 'dark',
+
+    syncURL: null,
+    username: null,
+    password: null,
+    syncInterval: 300,
 };
 
 exports.DICTIONARIES = {
