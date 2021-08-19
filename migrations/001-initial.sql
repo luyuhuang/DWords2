@@ -8,12 +8,13 @@ create table sys (
 );
 
 create table plans (
-    id integer primary key autoincrement,
-    name varchar(255) not null
+    id varchar(128) primary key,
+    name varchar(255) not null,
+    version integer not null default 0
 );
 
 create table words (
-    plan_id integer not null,
+    plan_id varchar(128) not null,
     word varchar(128),
     time integer not null,
     paraphrase text not null default '',
@@ -32,7 +33,7 @@ create table settings (
 );
 
 create table sync (
-    plan_id integer primary key,
+    plan_id varchar(128) primary key,
     version varchar(255),
     sequence integer not null
 );

@@ -22,7 +22,7 @@
       </table>
     </div>
     <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
-      <button type="button" class="btn btn-primary me-2" @click="clickSync">
+      <button type="button" class="btn btn-primary me-2" :disabled="syncing" @click="clickSync">
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="syncing"></span>
         {{ syncing ? 'Syncing...' : 'Sync' }}
       </button>
@@ -72,7 +72,8 @@ export default {
       }
     },
 
-    clickClose() {
+    clickClose(e) {
+      e.target.blur();
       ipcRenderer.send('close');
     },
 

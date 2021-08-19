@@ -1,6 +1,7 @@
 const { BrowserWindow } = require('electron');
 const { readFile } = require('fs/promises');
 const { getUserDB } = require('./database');
+const { v1 } = require('uuid');
 
 function wait(t) {
     return new Promise(resolve => setTimeout(resolve, t));
@@ -20,8 +21,7 @@ function getDanmakuWins() {
 
 function toCSV(fields, list) {
     return list.map(entry => fields.map(field => {
-        let value = entry[field] === null || entry[field] === undefined ?
-            '' : JSON.stringify(entry[field]);
+        let value = field.stringify(entry[field.name]);
         if (value.search(/[,"\r\n]/) >= 0) {
             value = value.replace(/"/g, '""');
             value = '"' + value + '"';
@@ -63,17 +63,19 @@ function parseCSVField(csv, i) {
 }
 
 function* parseCSV(fields, csv) {
+    const set = (o, f, v) => o[f.name] = f.parse(v);
+
     for (let i = 0; i < csv.length; ++i) {
         const obj = {};
         let index = 0;
         while (i < csv.length && csv[i] !== '\n') {
             const [value, j] = parseCSVField(csv, i);
-            obj[fields[index++]] = value ? JSON.parse(value) : null;
+            set(obj, fields[index++], value);
             i = j;
             if (i < csv.length && csv[i] === ',') {
                 ++i;
                 if (i >= csv.length || csv[i] == '\n') {
-                    obj[fields[index++]] = null;
+                    set(obj, fields[index++], '');
                 }
             }
         }
@@ -108,7 +110,39 @@ async function setSys(key, value) {
     await getUserDB().run(`insert or replace into sys values (?, ?)`, key, JSON.stringify(value));
 }
 
+function genUUID() {
+    const srcAlphabet = '0123456789abcdef';
+    const dstAlphabet = `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_~!$&'()*+,;=:@`;
+    const fromBase = srcAlphabet.length;
+    const toBase = dstAlphabet.length;
+
+    const number = v1().replace(/-/g, '');
+    let length = number.length;
+    const numberMap = {};
+    for (i = 0; i < length; i++) {
+        numberMap[i] = srcAlphabet.indexOf(number[i]);
+    }
+
+    let divide, newlen, result = '';
+    do {
+        divide = 0, newlen = 0;
+        for (i = 0; i < length; i++) {
+            divide = divide * fromBase + numberMap[i];
+            if (divide >= toBase) {
+                numberMap[newlen++] = parseInt(divide / toBase, 10);
+                divide = divide % toBase;
+            } else if (newlen > 0) {
+                numberMap[newlen++] = 0;
+            }
+        }
+        length = newlen;
+        result = dstAlphabet.slice(divide, divide + 1).concat(result);
+    } while (newlen !== 0);
+
+    return result;
+}
+
 module.exports = {
     getWinByWebContentsID, getMainWin, getDanmakuWins, toCSV, parseCSV, wait,
-    currentVersion, compareVersions, getSys, setSys,
+    currentVersion, compareVersions, getSys, setSys, genUUID,
 }

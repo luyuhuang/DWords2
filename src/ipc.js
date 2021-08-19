@@ -1,6 +1,6 @@
 const { DICTIONARIES } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
-const { getWinByWebContentsID, getMainWin, getSys, setSys } = require("./utils");
+const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID } = require("./utils");
 const settings = require('./settings');
 const { synchronize } = require("./sync");
 
@@ -62,8 +62,9 @@ const planInitializers = {
 };
 
 async function newPlan(_, plan) {
-    const st = await getUserDB().run(`insert into plans (name) values (?)`, plan.name);
-    const planID = st.lastID;
+    const planID = genUUID();
+    await getUserDB().run(`insert into plans (id, name, version) values (?, ?, ?)`,
+        planID, plan.name, Date.now());
     if (!await getCurrentPlan()) {
         await selectPlan(_, planID);
     }
@@ -77,7 +78,8 @@ async function newPlan(_, plan) {
 }
 
 async function renamePlan(_, id, name) {
-    await getUserDB().run(`update plans set name = ? where id = ?`, name, id);
+    await getUserDB().run(`update plans set name = ?, version = ? where id = ?`,
+        name, Date.now(), id);
 }
 
 async function delPlan(_, id) {
