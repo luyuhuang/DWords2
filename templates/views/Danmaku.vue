@@ -55,7 +55,7 @@ export default {
     return {
       word: urlParams.get('word'),
       phonetic: urlParams.get('phonetic'),
-      planID: Number(urlParams.get('plan_id')),
+      planID: urlParams.get('plan_id'),
       paraphrase: urlParams.get('paraphrase'),
       showParaphrase: show_paraphrase ? show_paraphrase === '1' : null,
       status: Number(urlParams.get('status')),
@@ -142,7 +142,7 @@ export default {
 
     clickMemorized() {
       this.status = this.status === 1 ? 0 : 1;
-      ipcRenderer.invoke('updateWord', {word: this.word, plan_id: this.planID, status: this.status});
+      ipcRenderer.invoke('updateWord', this.planID, this.word, {status: this.status});
     },
 
     pronounce(e) {
@@ -157,11 +157,11 @@ export default {
 
     toggleParaphrase() {
       this.showParaphrase = !this.isParaphrase;
-      ipcRenderer.invoke('updateWord', {word: this.word, plan_id: this.planID, show_paraphrase: this.showParaphrase});
+      ipcRenderer.invoke('updateWord', this.planID, this.word, {show_paraphrase: this.showParaphrase});
     },
 
     async clickColor() {
-      ipcRenderer.invoke('updateWord', {word: this.word, plan_id: this.planID, color: this.color});
+      ipcRenderer.invoke('updateWord', this.planID, this.word, {color: this.color});
     },
 
     updateSize() {

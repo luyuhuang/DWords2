@@ -3,6 +3,7 @@ const { getUserDB } = require('./database');
 const { wait, compareVersions, parseCSV, getSys, toCSV, setSys } = require('./utils');
 const migrateCloud = require('./migrateCloud');
 const { getSettings } = require('./settings');
+const { app } = require('electron');
 
 const lockPath = key => `/.lock-${key}`;
 const wordsPath = id => `/words/${id}`;
@@ -19,12 +20,14 @@ const wordFields = [
     { name: 'color', stringify: nullable(c => c), parse: emptiable(c => c) },
     { name: 'status', stringify: int2str, parse: parseInt },
     { name: 'version', stringify: int2str, parse: parseInt },
+    { name: 'deleted', stringify: d => d ? '1' : '0', parse: s => s === '1' },
 ];
 
 const planFields = [
     { name: 'id', stringify: i => i, parse: i => i },
     { name: 'name', stringify: i => i, parse: i => i },
     { name: 'version', stringify: int2str, parse: parseInt },
+    { name: 'deleted', stringify: d => d ? '1' : '0', parse: s => s === '1' },
 ];
 
 function initSync(dwords) {
@@ -64,6 +67,11 @@ async function migrate(dav) {
         if (e.status !== 404) {
             throw e;
         }
+    }
+
+    const appVersion = app.getVersion();
+    if (compareVersions(appVersion, version) < 0) {
+        throw Error(`Current version (${appVersion}) is older the cloud version (${version}), please update DWords.`);
     }
 
     const versions = Object.keys(migrateCloud).sort(compareVersions);
@@ -255,15 +263,15 @@ async function syncWords(dav, plan) {
     });
 }
 
-async function updatePlan(id, name, version) {
+async function updatePlan(id, name, version, deleted) {
     const p = await getUserDB().get(`select id from plans where id = ?`, id);
 
     if (p) {
-        await getUserDB().run(`update plans set name = ?, version = ?
-            where id = ? and version < ?`, name, version, id, version);
+        await getUserDB().run(`update plans set name = ?, version = ?, deleted = ?
+            where id = ? and version < ?`, name, version, deleted, id, version);
     } else {
-        await getUserDB().run(`insert into plans (id, name, version)
-            values (?, ?, ?)`, id, name, version);
+        await getUserDB().run(`insert into plans (id, name, version, deleted)
+            values (?, ?, ?, ?)`, id, name, version, deleted);
     }
 }
 
@@ -282,8 +290,15 @@ async function syncPlans(dav) {
 
         // pull
         if (data) {
-            for (const {id, name, version} of parseCSV(planFields, data)) {
-                await updatePlan(id, name, version);
+            let newID;
+            for (const {id, name, version, deleted} of parseCSV(planFields, data)) {
+                if (!newID && !deleted) {
+                    newID = id;
+                }
+                await updatePlan(id, name, version, deleted);
+            }
+            if (!(await getSys('currentPlan'))) {
+                await setSys('currentPlan', newID);
             }
         }
 
@@ -316,7 +331,7 @@ async function synchronize(dwords) {
 
         await syncPlans(dav);
 
-        const plans = await getUserDB().all(`select * from plans`);
+        const plans = await getUserDB().all(`select * from plans where not deleted`);
         await Promise.all(plans.map(plan => syncWords(dav, plan)));
 
         await setSys('syncVersion', Date.now()); // TODO: deal with modifications during sync

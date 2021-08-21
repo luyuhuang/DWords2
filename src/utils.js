@@ -1,5 +1,4 @@
 const { BrowserWindow } = require('electron');
-const { readFile } = require('fs/promises');
 const { getUserDB } = require('./database');
 const { v1 } = require('uuid');
 
@@ -63,7 +62,7 @@ function parseCSVField(csv, i) {
 }
 
 function* parseCSV(fields, csv) {
-    const set = (o, f, v) => o[f.name] = f.parse(v);
+    const set = (o, f, v) => f ? o[f.name] = f.parse(v) : f;
 
     for (let i = 0; i < csv.length; ++i) {
         const obj = {};
@@ -81,11 +80,6 @@ function* parseCSV(fields, csv) {
         }
         yield obj;
     }
-}
-
-async function currentVersion() {
-    const data = await readFile('package.json', {encoding: 'utf8'});
-    return JSON.parse(data.toString()).version;
 }
 
 function compareVersions(v1, v2) {
@@ -144,5 +138,5 @@ function genUUID() {
 
 module.exports = {
     getWinByWebContentsID, getMainWin, getDanmakuWins, toCSV, parseCSV, wait,
-    currentVersion, compareVersions, getSys, setSys, genUUID,
+    compareVersions, getSys, setSys, genUUID,
 }

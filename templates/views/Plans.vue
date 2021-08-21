@@ -19,7 +19,7 @@
           <ul class="dropdown-menu">
             <li><a class="dropdown-item" @click="newEmptyPlan"><i class="bi bi-file-earmark me-2"></i>Empty Plan</a></li>
             <li><a class="dropdown-item" @click="fromLibrary"><i class="bi bi-collection me-2"></i>From Library</a></li>
-            <li><a class="dropdown-item"><i class="bi bi-folder me-2"></i>Import...</a></li>
+            <li><a class="dropdown-item" @click="importPlan"><i class="bi bi-folder me-2"></i>Import...</a></li>
           </ul>
         </div>
 
@@ -109,12 +109,14 @@
 
 <script>
 import { html2text } from '../scripts/utils';
-import Title from '../components/Title.vue'
-import PlanLibrary from '../components/PlanLibrary.vue'
-import Alert from '../components/Alert.vue'
-import Toast from '../components/Toast.vue'
+import Title from '../components/Title.vue';
+import PlanLibrary from '../components/PlanLibrary.vue';
+import Alert from '../components/Alert.vue';
+import Toast from '../components/Toast.vue';
+import { DICTIONARIES } from '../../src/common';
+import { basename, extname } from 'path';
+
 const { ipcRenderer } = window.require('electron');
-import { DICTIONARIES } from '../../src/common'
 
 export default {
   components: {Title, PlanLibrary, Alert, Toast},
@@ -199,6 +201,20 @@ export default {
       this.showPlanInput();
     },
 
+    async importPlan() {
+      const path = await ipcRenderer.invoke('importPlan');
+      if (!path) return;
+
+      const ext = extname(path);
+      if (ext !== '.csv') {
+        this.$emit('showToast', {content: 'File type should be .csv', delay: 3000});
+        return;
+      }
+
+      this.newPlanCtx = { type: 'import_', name: basename(path, ext), path };
+      this.showPlanInput();
+    },
+
     showPlanInput() {
       this.planning = true;
       this.$nextTick(() => this.$refs.planInput.focus());
@@ -215,9 +231,14 @@ export default {
         title: 'Waiting', content,
         animation: false, autohide: false, position: 'RB'
       });
-      await ipcRenderer.invoke('newPlan', this.newPlanCtx);
-      await this.getPlans();
-      this.$emit('hideToast');
+
+      const {id, err} = await ipcRenderer.invoke('newPlan', this.newPlanCtx);
+      if (err) {
+        this.$emit('showToast', {content: err, delay: 3000});
+      } else {
+        await this.getPlans();
+        this.$emit('hideToast');
+      }
     },
 
     selectPlan() {
@@ -335,16 +356,14 @@ export default {
     },
 
     async updateWord() {
-      const word = {
-        plan_id: this.editingWord.plan_id,
-        word: this.editingWord.word,
+      const planID = this.editingWord.plan_id;
+      const word = this.editingWord.word;
+      const data = {
+        word: this.editingWord.newWord,
         paraphrase: this.editingWord.paraphrase,
       }
-      if (word.word !== this.editingWord.newWord) {
-        word.newWord = this.editingWord.newWord;
-      }
 
-      const err = await ipcRenderer.invoke('updateWord', word);
+      const err = await ipcRenderer.invoke('updateWord', planID, word, data);
       if (err) {
         this.$emit('showToast', {content: 'Duplicated word', delay: 3000});
         return;

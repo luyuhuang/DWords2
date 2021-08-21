@@ -4,6 +4,7 @@ const ipc = require('./ipc');
 const { initSettings, watchSettings } = require('./settings');
 const { initSync } = require('./sync');
 const { getMainWin } = require('./utils');
+const path = require('path');
 
 function initDWords() {
     const dwords = {};
@@ -13,6 +14,7 @@ function initDWords() {
     setIPC(dwords);
     setAppEvents();
     createMainWindow();
+    setMenu();
     setTray(dwords);
     initDanmaku(dwords);
 
@@ -52,8 +54,12 @@ function showWindow() {
     }
 }
 
+function setMenu() {
+    // Menu.setApplicationMenu(new Menu);
+}
+
 function setTray(dwords) {
-    const tray = new Tray('assets/img/logo@2x.png');
+    const tray = new Tray(path.join(__dirname, '../assets/img/logo@2x.png'));
     tray.setToolTip('DWords');
     tray.setContextMenu(Menu.buildFromTemplate([
         {

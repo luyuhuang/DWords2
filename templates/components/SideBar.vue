@@ -1,7 +1,7 @@
 <template>
   <div class="d-flex flex-column bg-light border-end no-select" style="width: 320px">
     <div class="d-flex align-items-center p-4 pb-1" style="-webkit-app-region: drag">
-      <img src="../../assets/img/logo.svg" width="60" height="60" />
+      <img src="../../assets/img/logo.png" width="60" height="60" />
       <strong class="fs-3 ms-2">DWords</strong>
     </div>
 
@@ -23,9 +23,9 @@
           <li><a class="dropdown-item" href="#/plans"><i class="bi bi-journals me-2"></i>Plans</a></li>
           <!-- <li><a class="dropdown-item" href="#/statistics"><i class="bi bi-bar-chart-line me-2"></i>Statistics</a></li> -->
           <li><a class="dropdown-item" href="#/settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
-          <li><a class="dropdown-item" href="#"><i class="bi bi-info-circle me-2"></i>About</a></li>
+          <li><a class="dropdown-item" href="#" @click="clickAbout"><i class="bi bi-info-circle me-2"></i>About</a></li>
           <li><hr class="dropdown-divider"></li>
-          <li><a class="dropdown-item" href="#"><i class="bi bi-x-circle me-2"></i>Exit</a></li>
+          <li><a class="dropdown-item" href="#" @click="clickExit"><i class="bi bi-x-circle me-2"></i>Exit</a></li>
         </ul>
       </div>
     </div>
@@ -33,6 +33,8 @@
 </template>
 
 <script>
+const { ipcRenderer } = window.require("electron");
+
 export default {
   name: 'SideBar',
   data() {
@@ -52,6 +54,14 @@ export default {
 
     clickNav({target}) {
       this.$emit('on-change-tag', target.name);
+    },
+
+    clickAbout() {
+      ipcRenderer.invoke('showAbout');
+    },
+
+    clickExit() {
+      ipcRenderer.send('exit');
     },
   },
 

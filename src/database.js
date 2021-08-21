@@ -8,13 +8,16 @@ let userDB, dictDB;
 
 async function initDB() {
     await mkdir(DATA_DIR, {recursive: true});
-    userDB = await open({filename: path.join(DATA_DIR, 'dwords.db'), driver: Database});
+    userDB = await open({filename: path.join(DATA_DIR, 'user.db'), driver: Database});
     await userDB.migrate({
         table: 'migrations',
-        migrationsPath: './migrations',
+        migrationsPath: path.join(__dirname, '../migrations'),
     });
 
-    dictDB = await open({filename: 'assets/data/dict.db', driver: Database});
+    dictDB = await open({
+        filename: path.join(__dirname, '../assets/data/dict.db'),
+        driver: Database
+    });
 }
 
 function getUserDB() {

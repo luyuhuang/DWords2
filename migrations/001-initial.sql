@@ -10,7 +10,8 @@ create table sys (
 create table plans (
     id varchar(128) primary key,
     name varchar(255) not null,
-    version integer not null default 0
+    version integer not null default 0,
+    deleted boolean not null default false
 );
 
 create table words (
@@ -22,6 +23,7 @@ create table words (
     color varchar(32),
     status integer not null default 0,
     version integer not null default 0,
+    deleted boolean not null default false,
     primary key (plan_id, word)
 );
 
