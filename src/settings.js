@@ -1,8 +1,24 @@
+const AutoLaunch = require("auto-launch");
+const { app } = require("electron");
 const { DEFAULT_SETTINGS } = require("./common");
 const { getUserDB } = require("./database");
 
 function initSettings(dwords) {
     dwords.watchers = {}
+
+    watchSettings(dwords, 'autoRun', (autoRun) => {
+        const autoLaunch = new AutoLaunch({
+            name: 'DWords',
+            path: app.getPath('exe'),
+            isHidden: true,
+        });
+
+        if (autoRun) {
+            autoLaunch.enable();
+        } else {
+            autoLaunch.disable();
+        }
+    });
 }
 
 async function getSettings(...keys) {
@@ -42,7 +58,7 @@ async function updateSettings(dwords, settings) {
     for (const key in settings) {
         const handlers = dwords.watchers[key];
         if (handlers) {
-            handlers.forEach(handler => handler());
+            handlers.forEach(handler => handler(settings[key]));
         }
     }
 }

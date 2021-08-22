@@ -14,9 +14,13 @@
     <div class="mb-auto" style="overflow-y: auto;">
       <table class="table table-striped table-borderless">
         <tbody ref="tableBody">
-          <tr v-for="(word, i) in wordList" :key="i">
+          <tr v-for="(word, i) in wordList" :key="i" @click="clickWord(word)">
             <td>{{ word.word }}</td>
-            <td>{{ html2text(word.paraphrase) }}</td>
+            <td>
+              <span :style="!quiz || word.see ? 'opacity:1' : 'opacity:0'">
+                {{ html2text(word.paraphrase) }}
+              </span>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -26,7 +30,9 @@
         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="syncing"></span>
         {{ syncing ? 'Syncing...' : 'Sync' }}
       </button>
-      <button type="button" class="btn btn-primary me-2">Burst</button>
+      <button type="button" class="btn me-2" :class="quiz ? 'btn-secondary' : 'btn-primary'" @click="clickQuiz">
+        {{quiz ? 'Back' : 'Quiz'}}
+      </button>
     </div>
 
     <Toast></Toast>
@@ -49,6 +55,7 @@ export default {
 
   data() {
     return {
+      quiz: false,
       syncing: false,
     };
   },
@@ -75,6 +82,17 @@ export default {
     clickClose(e) {
       e.target.blur();
       ipcRenderer.send('close');
+    },
+
+    clickQuiz() {
+      this.quiz = !this.quiz;
+      for (const word of this.wordList) {
+        word.see = false;
+      }
+    },
+
+    clickWord(word) {
+      word.see = !word.see;
     },
 
     async clickSync() {

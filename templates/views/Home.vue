@@ -28,7 +28,8 @@ export default {
 
   methods: {
     async setWordList(tab) {
-      this.wordList = await ipcRenderer.invoke('getWordList', tab);
+      const words = await ipcRenderer.invoke('getWordList', tab);
+      this.wordList = words.map(word => (word.see = false, word));
     },
 
     onChangeTab(tab) {
