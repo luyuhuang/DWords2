@@ -2,5 +2,4 @@ node_modules/
 renderer/
 main/
 .DS_Store
-
-out/
+dist/
