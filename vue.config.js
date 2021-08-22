@@ -1,5 +1,6 @@
 module.exports = {
     publicPath: './',
+    outputDir: './renderer',
     pages: {
         home: {
             entry: 'templates/home.js',

@@ -43,7 +43,7 @@ async function createDanmaku(word) {
 
     danmaku.word = word.word;
 
-    await danmaku.loadFile('dist/danmaku.html', { query: word });
+    await danmaku.loadFile('renderer/danmaku.html', { query: word });
     danmaku.setSkipTaskbar(true);
     danmaku.setMenu(null);
     danmaku.showInactive();

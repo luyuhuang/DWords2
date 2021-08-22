@@ -42,7 +42,7 @@ function createMainWindow() {
         }
     });
 
-    mainWindow.loadFile('dist/home.html');
+    mainWindow.loadFile('renderer/home.html');
 }
 
 function showWindow() {
