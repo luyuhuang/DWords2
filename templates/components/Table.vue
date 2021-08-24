@@ -17,7 +17,7 @@
           <tr v-for="(word, i) in wordList" :key="i" @click="clickWord(word)" @contextmenu="wordMenu($event, word)">
             <td>{{ word.word }}</td>
             <td>
-              <span :style="!quiz || word.see ? 'opacity:1' : 'opacity:0'">
+              <span class="paraphrase" :hide="quiz && !word.see">
                 {{ html2text(word.paraphrase) }}
               </span>
             </td>
@@ -98,12 +98,25 @@ export default {
     },
 
     wordMenu(e, word) {
-      this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items: [
-        { name: 'Detail', onclick: () => {} },
+      const mark = word.status === 0 ? 'memorized' : 'unmemorized';
+
+      const items = [
+        { name: 'Detail', onclick: () => this.wordDetail(word) },
         { name: 'Edit', onclick: () => {} },
-        '-----------',
-        { name: 'Mark as memorized', onclick: () => {} },
-      ]});
+        '----------------',
+        { name: `Mark as ${mark}`, onclick: () => this.toggleWordStatus(word) },
+      ];
+
+      this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items});
+    },
+
+    wordDetail(word) {
+      this.$emit('search', word.word);
+    },
+
+    toggleWordStatus(word) {
+      const status = word.status === 1 ? 0 : 1;
+      ipcRenderer.invoke('updateWord', word.plan_id, word.word, {status});
     },
 
     async clickSync() {
@@ -120,3 +133,16 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.paraphrase {
+  transition-duration: 0.3s;
+  opacity: 1;
+}
+
+.paraphrase[hide] {
+  opacity: 0;
+  filter: blur(0.2em);
+}
+
+</style>

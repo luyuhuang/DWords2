@@ -2,7 +2,7 @@
   <div ref="menu" class="context-menu" tabindex="0" :style="menuStyle" v-if="show" @blur="focusOut">
     <ul class="dropdown-menu pt-1 pb-1 show shadow">
       <li v-for="(item, i) in items" :key="i">
-        <hr v-if="/^---+/.test(item)" class="dropdown-divider">
+        <hr v-if="/^---+/.test(item)" class="m-1">
         <a v-else class="dropdown-item" href="#" @click="clickItem(item)" v-html="item.name"></a>
       </li>
     </ul>

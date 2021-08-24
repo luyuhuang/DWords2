@@ -230,6 +230,20 @@ async function consultDictionary(_, word) {
     return await getDictDB().get(`select *, ${dict.field} as paraphrase from ${dict.table} where word = ?`, word);
 }
 
+async function search(_, word) {
+    const planID = await getCurrentPlan();
+    const res = await getUserDB().get(`select * from words where word = ? and plan_id = ?`, word, planID);
+    let d = await consultDictionary(undefined, word);
+    if (res) {
+        if (!d) {
+            d = {word};
+        }
+        d.paraphrase = res.paraphrase;
+        d.status = res.status;
+    }
+    return d;
+}
+
 async function getSettings(_, ...keys) {
     return await settings.getSettings(...keys);
 }
@@ -290,6 +304,6 @@ function exit() {
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, selectPlan, newPlan, renamePlan, delPlan, addWord, getWordList,
-    updateWord, delWord, consultDictionary, getSettings, updateSettings, getWordsByPrefix,
-    toggleDevTools, sync, importPlan, showAbout, exit,
+    updateWord, delWord, consultDictionary, search, getSettings, updateSettings,
+    getWordsByPrefix, toggleDevTools, sync, importPlan, showAbout, exit,
 }

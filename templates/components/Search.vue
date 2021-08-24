@@ -31,6 +31,13 @@
               <a @click="clickDictionary" href="#" :index="i"> {{ dict.name }} </a>
             </div>
           </div>
+
+          <div class="modal-footer p-2" v-if="result.status !== undefined">
+            <button class="btn btn-outline-secondary btn-sm me-2">Edit</button>
+            <button class="btn btn-outline-secondary btn-sm me-2">
+              Mark as {{ result.status === 0 ? 'memorized' : 'unmemorized' }}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -65,11 +72,12 @@ export default {
         this.inputedWord = '';
       }
     });
+    this.$parent.$on('search', this.search);
   },
 
   methods: {
     async search(word) {
-      const res = await ipcRenderer.invoke('consultDictionary', word);
+      const res = await ipcRenderer.invoke('search', word);
       if (res) {
         this.result = res;
         this.modal.show();

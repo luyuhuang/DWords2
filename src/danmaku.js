@@ -102,8 +102,8 @@ async function setDanmakuMover(dwords) {
         last = now;
         BrowserWindow.getAllWindows().forEach((win) => {
             if (win.getTitle() !== 'Danmaku') return;
-            const [x, y] = win.getPosition();
-            if (x < 0) {
+            const {x, y, width} = win.getBounds();
+            if (x + width - dis <= 0) {
                 win.close();
                 dwords.currentDanmakus.delete(win.word);
             } else {
