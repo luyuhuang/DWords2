@@ -7,7 +7,7 @@
       </button>
     </div>
 
-    <div class="preview-list border" v-if="candidates.length > 0">
+    <div class="preview-list border shadow" v-if="candidates.length > 0">
       <div class="list-group list-group-flush">
         <a class="list-group-item list-group-item-action" href="#" v-for="(word, i) in candidates" :key="i" @click="search(word)">
           {{ word }}

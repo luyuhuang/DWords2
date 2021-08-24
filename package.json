@@ -9,8 +9,8 @@
     "start": "yarn build && electron .",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "pack": "electron-builder --dir",
-    "dist": "electron-builder"
+    "pack": "yarn build && electron-builder --dir",
+    "dist": "yarn build && electron-builder"
   },
   "build": {
     "appId": "tech.luyuhuang.dwords2",

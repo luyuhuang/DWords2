@@ -14,7 +14,7 @@
     <div class="mb-auto" style="overflow-y: auto;">
       <table class="table table-striped table-borderless">
         <tbody ref="tableBody">
-          <tr v-for="(word, i) in wordList" :key="i" @click="clickWord(word)">
+          <tr v-for="(word, i) in wordList" :key="i" @click="clickWord(word)" @contextmenu="wordMenu($event, word)">
             <td>{{ word.word }}</td>
             <td>
               <span :style="!quiz || word.see ? 'opacity:1' : 'opacity:0'">
@@ -36,12 +36,14 @@
     </div>
 
     <Toast></Toast>
+    <ContextMenu></ContextMenu>
   </div>
 </template>
 
 <script>
 import Search from './Search.vue';
 import Toast from '../components/Toast.vue'
+import ContextMenu from '../components/ContextMenu.vue'
 import { html2text } from '../scripts/utils';
 const { ipcRenderer } = window.require("electron");
 
@@ -51,7 +53,7 @@ export default {
     wordList: Array,
   },
 
-  components: {Search, Toast},
+  components: {Search, Toast, ContextMenu},
 
   data() {
     return {
@@ -93,6 +95,15 @@ export default {
 
     clickWord(word) {
       word.see = !word.see;
+    },
+
+    wordMenu(e, word) {
+      this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items: [
+        { name: 'Detail', onclick: () => {} },
+        { name: 'Edit', onclick: () => {} },
+        '-----------',
+        { name: 'Mark as memorized', onclick: () => {} },
+      ]});
     },
 
     async clickSync() {
