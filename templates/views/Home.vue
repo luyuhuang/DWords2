@@ -1,7 +1,7 @@
 <template>
   <div id="widget" class="d-flex flex-row" style="height: 100vh">
-    <SideBar :currentTab="currentTab" @on-change-tag="onChangeTab"></SideBar>
-    <Table :wordList="wordList"></Table>
+    <SideBar :currentTab="currentTab" @onChangeTab="onChangeTab"></SideBar>
+    <Table :words="words" @needMore="appendWordList"></Table>
   </div>
 </template>
 
@@ -15,26 +15,36 @@ export default {
   data() {
     return {
       currentTab: 'Current',
-      wordList: [],
+      words: [],
+      appending: false,
     };
   },
 
   components: {Table, SideBar},
 
   created() {
-    ipcRenderer.on('refreshList', () => this.setWordList(this.currentTab));
-    this.setWordList(this.currentTab);
+    ipcRenderer.on('refreshList', () => this.setWordList());
+    this.setWordList();
   },
 
   methods: {
-    async setWordList(tab) {
-      const words = await ipcRenderer.invoke('getWordList', tab);
-      this.wordList = words.map(word => (word.see = false, word));
+    async appendWordList() {
+      if (this.appending) return;
+      this.appending = true;
+      const words = await ipcRenderer.invoke('getWordList', this.currentTab, 100, this.words.length);
+      this.words.push(...words.map(word => (word.see = false, word)));
+      this.appending = false;
+    },
+
+    async setWordList() {
+      this.words = [];
+      await this.appendWordList();
     },
 
     onChangeTab(tab) {
+      if (tab === this.currentTab) return;
       this.currentTab = tab;
-      this.setWordList(tab)
+      this.setWordList();
     },
   },
 };

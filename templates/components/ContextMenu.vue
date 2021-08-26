@@ -42,7 +42,7 @@ export default {
     },
 
     clickItem(item) {
-      item.onclick();
+      item.action();
       this.show = false;
     }
   },

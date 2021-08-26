@@ -53,7 +53,7 @@ export default {
     },
 
     clickNav({target}) {
-      this.$emit('on-change-tag', target.name);
+      this.$emit('onChangeTab', target.name);
     },
 
     clickAbout() {

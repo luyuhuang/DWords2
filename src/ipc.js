@@ -39,9 +39,13 @@ async function getCurrentPlan() {
     return await getSys('currentPlan');
 }
 
-async function getWords(_, planID) {
-    return await getUserDB().all(`select * from words
-        where not deleted and plan_id = ? order by time`, planID);
+async function getWords(_, planID, limit=-1, offset=0) {
+    const count = (await getUserDB().get(`select count(*) as c from words
+        where plan_id = ? and not deleted`, planID)).c;
+    const words = await getUserDB().all(`select * from words
+        where plan_id = ? and not deleted order by time
+        limit ? offset ?`, planID, limit, offset);
+    return { count, words };
 }
 
 async function selectPlan(_, planID) {
@@ -149,32 +153,38 @@ async function addWord(_, planID, word, time, paraphrase) {
     return true;
 }
 
-async function getWordList(_, tab) {
+async function getWordList(_, tab, limit=-1, offset=0) {
     const planId = await getCurrentPlan();
     const maxCurrent = await settings.getSetting('maxCurrent');
-    let ans
+    let sql, args;
     switch (tab) {
         case "Current":
-            ans = await getUserDB().all(`select * from words
-                where plan_id = ? and status = 0 and not deleted order by time limit ?`,
-                planId, maxCurrent);
+            sql = `select * from words
+                where plan_id = ? and status = 0 and not deleted
+                order by time limit ?`;
+            args = [planId, maxCurrent];
             break;
         case "Planning":
-            ans = await getUserDB().all(`select * from words
-                where plan_id = ? and status = 0 and not deleted order by time limit -1 offset ?`,
-                planId, maxCurrent);
+            sql = `select * from words
+                where plan_id = ? and status = 0 and not deleted
+                order by time limit -1 offset ?`;
+            args = [planId, maxCurrent];
             break;
         case "Memorized":
-            ans = await getUserDB().all(`select * from words
-                where plan_id = ? and status = 1 and not deleted order by time`,
-                planId);
+            sql = `select * from words
+                where plan_id = ? and status = 1 and not deleted
+                order by time`;
+            args = [planId];
             break;
         case "All":
-            ans = await getUserDB().all(`select * from words
-                where plan_id = ? and not deleted order by time`, planId);
+            sql = `select * from words
+                where plan_id = ? and not deleted order by time`;
+            args = [planId];
             break;
     }
-    return ans;
+
+    return await getUserDB().all(`with u as (${sql}) select * from u limit ? offset ?`,
+        ...args, limit, offset);
 }
 
 async function updateWord(_, planID, word, data) {

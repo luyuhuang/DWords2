@@ -27,28 +27,25 @@
 
         <div style="overflow-y: auto">
           <ul class="nav nav-pills flex-column mb-auto">
-            <li class="nav-item" v-for="(plan, i) in plans" :key="i">
-              <div class="m-1 d-flex flex-row justify-content-between align-items-center" v-if="editingPlan.id == plan.id">
+            <li class="nav-item" v-for="(plan, i) in plans" :key="i" @contextmenu="planMenu($event, plan)">
+              <div v-if="editingPlan.id == plan.id" class="m-1 d-flex flex-row justify-content-between align-items-center">
                 <input class="form-control form-control-sm" placeholder="Plan Name" id="planEditor"
-                  v-model="editingPlan.name"  @change="modifyPlan" @keyup.enter="editingPlan = {}"
+                  v-model="editingPlan.name"  @change="modifyPlan"
+                  @keyup.enter="editingPlan = {}" @blur="editingPlan = {}"
                 >
-                <i class="ms-1 bi bi-trash" @click="delPlan(plan)"></i>
               </div>
 
-              <a class="nav-link d-flex flex-row has-edit"
-                :class="planCls(plan.id)" v-if="editingPlan.id != plan.id"
-              >
+              <a v-else class="nav-link d-flex flex-row has-edit" :class="planCls(plan.id)">
                 <div @click="clickPlan(plan)" style="flex: 1">
                   <i class="bi bi-journal-text me-2"></i>
                   {{ plan.name }}
                 </div>
-                <i class="bi bi-pencil-square edit-btn" @click="editPlan(plan)"></i>
               </a>
             </li>
 
             <li class="nav-item p-1" v-if="planning">
               <input class="form-control form-control-sm" placeholder="Plan Name" ref="planInput"
-                     v-model="newPlanCtx.name" @keyup.enter="enterPlan" @blur="planning = false">
+                     v-model="newPlanCtx.name" @keyup.enter="enterPlan" @blur="enterPlan">
             </li>
           </ul>
         </div>
@@ -60,25 +57,19 @@
             <tr> <th ref="wordHead">Word</th> <th>Paraphrase</th> </tr>
           </thead>
         </table>
-        <div style="overflow-y: auto" ref="wordList">
+        <div class="mb-auto" style="overflow-y: auto" ref="wordList">
           <table class="table table-striped table-borderless">
             <tbody ref="tableBody">
-              <tr class="has-edit" v-for="(word, i) in words" :key="i">
+              <tr class="has-edit" v-for="(word, i) in words" :key="i" @contextmenu="wordMenu($event, word)">
                 <td v-if="editingWord.word == word.word">
                   <input class="form-control form-control-sm" v-model="editingWord.newWord" @keyup.enter="enterNewWord">
                 </td>
+                <td v-else>{{ word.word }}</td>
+
                 <td v-if="editingWord.word == word.word">
                   <input class="form-control form-control-sm" id="paraphraseEditor" v-model="editingWord.paraphrase" @keyup.enter="enterNewParaphrase">
                 </td>
-                <td v-if="editingWord.word == word.word" style="vertical-align: middle">
-                  <i class="ms-1 bi bi-trash" @click="delWord(word)"></i>
-                </td>
-
-                <td v-if="editingWord.word != word.word">{{ word.word }}</td>
-                <td v-if="editingWord.word != word.word">{{ html2text(word.paraphrase) }}</td>
-                <td v-if="editingWord.word != word.word">
-                  <i class="bi bi-pencil-square edit-btn" @click="editWord(word)"></i>
-                </td>
+                <td v-else>{{ html2text(word.paraphrase) }}</td>
               </tr>
               <tr v-if="adding">
                 <td>
@@ -89,21 +80,38 @@
                 </td>
                 <td></td>
               </tr>
-              <tr style="height: 4rem"></tr>
             </tbody>
 
           </table>
         </div>
-      </div>
-    </div>
 
-    <div class="float-btn bg-primary d-flex flex-column justify-content-center" v-if="selectedPlan" :adding="adding" @click="clickAdd">
-      <div class="bi bi-plus-lg" style="text-align: center; color: white"></div>
+        <div v-if="selectedPlan" class="border-top d-flex flex-row p-2 align-items-center">
+          <nav class="col">
+            <ul class="pagination m-0 justify-content-center">
+              <li class="page-item" :class="page === 1 ? 'disabled' : ''">
+                <a class="page-link" href="#" @click="pageTo(page - 1)">&lt;</a>
+              </li>
+              <li v-for="(page, i) in pages" :key="i" class="page-item" :class="pageItemCls(page)">
+                <a class="page-link" href="#" @click="pageTo(page)">{{ page }}</a>
+              </li>
+              <li class="page-item" :class="page === pageNum ? 'disabled' : ''">
+                <a class="page-link" href="#" @click="pageTo(page + 1)">&gt;</a>
+              </li>
+            </ul>
+          </nav>
+
+          <button type="button" class="btn" :class="adding ? 'btn-secondary' : 'btn-primary'" @click="clickAdd">
+            {{ adding ? 'Back' : 'Add' }}
+          </button>
+        </div>
+
+      </div>
     </div>
 
     <PlanLibrary @choose="chooseLibrary"></PlanLibrary>
     <Alert></Alert>
     <Toast></Toast>
+    <ContextMenu></ContextMenu>
   </div>
 </template>
 
@@ -113,19 +121,26 @@ import Title from '../components/Title.vue';
 import PlanLibrary from '../components/PlanLibrary.vue';
 import Alert from '../components/Alert.vue';
 import Toast from '../components/Toast.vue';
+import ContextMenu from '../components/ContextMenu.vue';
 import { DICTIONARIES } from '../../src/common';
 import { basename, extname } from 'path';
 
 const { ipcRenderer } = window.require('electron');
 
 export default {
-  components: {Title, PlanLibrary, Alert, Toast},
+  components: {Title, PlanLibrary, Alert, Toast, ContextMenu},
   data() {
     return {
       currentPlan: undefined,
       selectedPlan: undefined,
       plans: [],
+
       words: [],
+      page: 1,
+      pageNum: 0,
+      pageSize: 100,
+      pages: [],
+
       planning: false,
       adding: false,
       newPlanCtx: {},
@@ -171,7 +186,60 @@ export default {
     },
 
     async getWords() {
-      this.words = await ipcRenderer.invoke('getWords', this.selectedPlan);
+      const limit = this.pageSize;
+      const offset = (this.page - 1) * this.pageSize;
+      const {count, words} = await ipcRenderer.invoke('getWords', this.selectedPlan, limit, offset);
+
+      const pageNum = Math.max(Math.ceil(count / this.pageSize), 1);
+      this.pageNum = pageNum;
+      this.words = words;
+
+      const up = 1, down = 2;
+      let pages = [], before = [], after = [];
+      for (let i = Math.max(1, this.page - up); i <= Math.min(pageNum, this.page + down); i++) {
+        pages.push(i);
+      }
+      for (let i = this.page - up; i < 1 && pages[pages.length - 1] < pageNum; i++) {
+        pages.push(pages[pages.length - 1] + 1);
+      }
+      for (let i = this.page + down; i > pageNum && pages[0] > 1; i--) {
+        pages.unshift(pages[0] - 1);
+      }
+
+      if (pages[0] !== 1) {
+        before.push(1);
+        if (pages[0] > 3) {
+          before.push('...');
+        } else if (pages[0] > 2) {
+          before.push(2);
+        }
+      }
+
+      if (pages[pages.length - 1] !== pageNum) {
+        if (pages[pages.length - 1] < pageNum - 2) {
+          after.push('...');
+        } else if (pages[pages.length - 1] < pageNum - 1) {
+          after.push(pageNum - 1);
+        }
+        after.push(pageNum);
+      }
+
+      this.pages = before.concat(pages).concat(after);
+    },
+
+    pageTo(page) {
+      this.page = page;
+      this.getWords();
+    },
+
+    pageItemCls(page) {
+      if (page === this.page) {
+        return 'active';
+      } else if (page === '...') {
+        return 'disabled';
+      } else {
+        return '';
+      }
     },
 
     planCls(planId) {
@@ -179,6 +247,8 @@ export default {
     },
 
     clickPlan(plan) {
+      this.page = 1;
+      this.adding = false;
       this.selectedPlan = plan.id;
       this.editingWord = {};
       this.getWords();
@@ -221,6 +291,8 @@ export default {
     },
 
     async enterPlan() {
+      if (!this.newPlanCtx.name) return;
+
       this.planning = false;
       const content = `
       <div class="spinner-border spinner-border-sm text-secondary">
@@ -245,6 +317,14 @@ export default {
       if (this.currentPlan) {
         ipcRenderer.invoke('selectPlan', this.currentPlan);
       }
+    },
+
+    planMenu(e, plan) {
+      const items = [
+        { name: 'Edit', action: () => this.editPlan(plan) },
+        { name: 'Delete', action: () => this.delPlan(plan) },
+      ];
+      this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items});
     },
 
     editPlan(plan) {
@@ -283,6 +363,7 @@ export default {
     clickAdd() {
       this.adding = !this.adding;
       if (this.adding) {
+        this.pageTo(this.pageNum);
         this.$nextTick(() => {
           this.scrollBottom();
           this.$refs.wordInput.focus();
@@ -317,7 +398,16 @@ export default {
 
       this.inputedWord = this.inputedParaphrase = '';
       this.$refs.wordInput.focus();
+      this.pageTo(this.pageNum);
       this.$nextTick(() => this.scrollBottom());
+    },
+
+    wordMenu(e, word) {
+      const items = [
+        { name: 'Edit', action: () => this.editWord(word) },
+        { name: 'Delete', action: () => this.delWord(word) },
+      ]
+      this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items});
     },
 
     editWord(word) {
@@ -406,38 +496,3 @@ export default {
   },
 }
 </script>
-
-<style scoped>
-.float-btn {
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 50%;
-  position: fixed;
-  right: 1rem;
-  bottom: 1rem;
-  transition-duration: 0.3s;
-}
-.float-btn[adding] {
-  transform: rotate(45deg);
-}
-.float-btn:hover {
-  filter: brightness(130%);
-}
-.float-btn:active {
-  filter: brightness(80%);
-}
-
-.edit-btn {
-  display: none;
-}
-.edit-btn:hover {
-  filter: brightness(130%);
-}
-.edit-btn:active {
-  filter: brightness(80%);
-}
-
-.has-edit:hover .edit-btn {
-  display: block;
-}
-</style>

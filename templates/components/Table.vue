@@ -11,10 +11,10 @@
         <tr> <th ref="wordHead">Word</th> <th>Paraphrase</th> </tr>
       </thead>
     </table>
-    <div class="mb-auto" style="overflow-y: auto;">
+    <div @scroll="scrollList" class="mb-auto" style="overflow-y: auto;">
       <table class="table table-striped table-borderless">
         <tbody ref="tableBody">
-          <tr v-for="(word, i) in wordList" :key="i" @click="clickWord(word)" @contextmenu="wordMenu($event, word)">
+          <tr v-for="(word, i) in words" :key="i" @click="clickWord(word)" @contextmenu="wordMenu($event, word)">
             <td>{{ word.word }}</td>
             <td>
               <span class="paraphrase" :hide="quiz && !word.see">
@@ -45,12 +45,12 @@ import Search from './Search.vue';
 import Toast from '../components/Toast.vue'
 import ContextMenu from '../components/ContextMenu.vue'
 import { html2text } from '../scripts/utils';
-const { ipcRenderer } = window.require("electron");
+const { ipcRenderer, shell } = window.require("electron");
 
 export default {
   name: 'Table',
   props: {
-    wordList: Array,
+    words: Array,
   },
 
   components: {Search, Toast, ContextMenu},
@@ -59,7 +59,12 @@ export default {
     return {
       quiz: false,
       syncing: false,
+      dictionaries: [],
     };
+  },
+
+  created() {
+    this.fetchSettings();
   },
 
   mounted() {
@@ -72,6 +77,11 @@ export default {
 
   methods: {
     html2text,
+
+    async fetchSettings() {
+      const settings = await ipcRenderer.invoke('getSettings', 'externalDictionaries');
+      this.dictionaries = settings.externalDictionaries;
+    },
 
     resizeThead() {
       const tbody = this.$refs.tableBody;
@@ -88,7 +98,7 @@ export default {
 
     clickQuiz() {
       this.quiz = !this.quiz;
-      for (const word of this.wordList) {
+      for (const word of this.words) {
         word.see = false;
       }
     },
@@ -101,11 +111,18 @@ export default {
       const mark = word.status === 0 ? 'memorized' : 'unmemorized';
 
       const items = [
-        { name: 'Detail', onclick: () => this.wordDetail(word) },
-        { name: 'Edit', onclick: () => {} },
+        { name: 'Detail', action: () => this.wordDetail(word) },
+        { name: 'Edit', action: () => {} },
         '----------------',
-        { name: `Mark as ${mark}`, onclick: () => this.toggleWordStatus(word) },
+        { name: `Mark as ${mark}`, action: () => this.toggleWordStatus(word) },
       ];
+
+      if (this.dictionaries.length > 0) {
+        items.push('----------------');
+        items.push(...this.dictionaries.map(d => ({
+          name: d.name, action: () => shell.openExternal(d.url + word.word)
+        })));
+      }
 
       this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items});
     },
@@ -117,6 +134,13 @@ export default {
     toggleWordStatus(word) {
       const status = word.status === 1 ? 0 : 1;
       ipcRenderer.invoke('updateWord', word.plan_id, word.word, {status});
+    },
+
+    scrollList(e) {
+      const wordList = e.target;
+      if (wordList.scrollHeight - Math.abs(wordList.scrollTop) === wordList.clientHeight) {
+        this.$emit('needMore');
+      }
     },
 
     async clickSync() {
