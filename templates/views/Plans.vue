@@ -45,7 +45,7 @@
 
             <li class="nav-item p-1" v-if="planning">
               <input class="form-control form-control-sm" placeholder="Plan Name" ref="planInput"
-                     v-model="newPlanCtx.name" @keyup.enter="enterPlan" @blur="enterPlan">
+                     v-model="newPlanCtx.name" @keyup.enter="$event.target.blur()" @blur="enterPlan">
             </li>
           </ul>
         </div>
@@ -54,17 +54,17 @@
       <div class="col-9 d-flex flex-column">
         <table class="table m-0 border-end no-select">
           <thead>
-            <tr> <th ref="wordHead">Word</th> <th>Paraphrase</th> </tr>
+            <tr> <th ref="wordHead" id="wordHead" :style="wordStyle">Word</th> <th>Paraphrase</th> </tr>
           </thead>
         </table>
         <div class="mb-auto" style="overflow-y: auto" ref="wordList">
-          <table class="table table-striped table-borderless">
+          <table class="table table-striped table-borderless table-content">
             <tbody ref="tableBody">
               <tr class="has-edit" v-for="(word, i) in words" :key="i" @contextmenu="wordMenu($event, word)">
-                <td v-if="editingWord.word == word.word">
+                <td v-if="editingWord.word == word.word" :style="wordStyle">
                   <input class="form-control form-control-sm" id="wordEditor" v-model="editingWord.newWord" @keyup.enter="enterNewWord">
                 </td>
-                <td v-else>{{ word.word }}</td>
+                <td v-else :style="wordStyle">{{ word.word }}</td>
 
                 <td v-if="editingWord.word == word.word">
                   <input class="form-control form-control-sm" id="paraphraseEditor" v-model="editingWord.paraphrase" @keyup.enter="enterNewParaphrase">
@@ -72,13 +72,12 @@
                 <td v-else>{{ html2text(word.paraphrase) }}</td>
               </tr>
               <tr v-if="adding">
-                <td>
+                <td :style="wordStyle">
                   <input class="form-control form-control-sm" placeholder="Word" ref="wordInput" @keyup.enter="enterWord" v-model="inputedWord">
                 </td>
                 <td>
                   <input class="form-control form-control-sm" placeholder="Paraphrase" ref="paraphraseInput" @keyup.enter="enterParaphrase" v-model="inputedParaphrase">
                 </td>
-                <td></td>
               </tr>
             </tbody>
 
@@ -131,6 +130,7 @@ export default {
   components: {Title, PlanLibrary, Alert, Toast, ContextMenu},
   data() {
     return {
+      wordWidth: 150,
       currentPlan: undefined,
       selectedPlan: undefined,
       plans: [],
@@ -169,15 +169,15 @@ export default {
       }
     });
 
-    const tbody = this.$refs.tableBody;
-    new MutationObserver(this.resizeThead).observe(tbody, {
-      childList: true, characterData: true, subtree: true
-    });
-    new ResizeObserver(this.resizeThead).observe(tbody)
+    new ResizeObserver(this.resize).observe(this.$refs.wordHead);
   },
 
   methods: {
     html2text,
+
+    resize() {
+      this.wordWidth = this.$refs.wordHead.clientWidth;
+    },
 
     async init() {
       await this.getPlans();
@@ -513,14 +513,6 @@ export default {
       this.editingWord = {};
     },
 
-    resizeThead() {
-      const tbody = this.$refs.tableBody;
-      const first = tbody && tbody.children[0];
-      if (first && first.children.length > 0) {
-        this.$refs.wordHead.width = first.children[0].clientWidth;
-      }
-    },
-
     getParaphrase(word, cb) {
       if (this.getParaphraseTimer) {
         clearTimeout(this.getParaphraseTimer);
@@ -532,6 +524,14 @@ export default {
           cb(res.paraphrase);
         }
       }, 100);
+    }
+  },
+
+  computed: {
+    wordStyle() {
+      return {
+        width: this.wordWidth + 'px',
+      };
     }
   },
 
@@ -547,3 +547,21 @@ export default {
   },
 }
 </script>
+
+<style scoped>
+.table-content {
+  table-layout: fixed;
+  width: 100%;
+}
+
+td {
+  text-overflow: ellipsis;
+  white-space:nowrap;
+  overflow: hidden;
+}
+
+#wordHead {
+  resize: horizontal;
+  overflow: auto;
+}
+</style>

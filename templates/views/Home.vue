@@ -1,5 +1,5 @@
 <template>
-  <div id="widget" class="d-flex flex-row" style="height: 100vh">
+  <div id="widget" class="d-flex flex-row" style="width: 100vw; height: 100vh">
     <SideBar :currentTab="currentTab" @onChangeTab="onChangeTab"></SideBar>
     <Table :words="words" @needMore="appendWordList"></Table>
   </div>

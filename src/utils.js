@@ -106,7 +106,7 @@ async function setSys(key, value) {
 
 function genUUID() {
     const srcAlphabet = '0123456789abcdef';
-    const dstAlphabet = `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_~!$&'()*+,;=:@`;
+    const dstAlphabet = `0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ.-_`;
     const fromBase = srcAlphabet.length;
     const toBase = dstAlphabet.length;
 

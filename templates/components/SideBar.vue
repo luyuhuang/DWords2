@@ -1,8 +1,8 @@
 <template>
-  <div class="d-flex flex-column bg-light border-end no-select" style="width: 320px">
+  <div class="col-3 d-flex flex-column bg-light border-end no-select">
     <div class="d-flex align-items-center p-4 pb-1" style="-webkit-app-region: drag">
       <img src="../../assets/img/logo.png" width="60" height="60" />
-      <strong class="fs-3 ms-2">DWords</strong>
+      <strong class="fs-4 ms-2 overflow-hidden">DWords</strong>
     </div>
 
     <div class="d-flex flex-column p-3 pt-0" style="flex: 1">

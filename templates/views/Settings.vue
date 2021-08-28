@@ -4,7 +4,7 @@
 
     <div class="d-flex flex-row" style="flex: 1; overflow-y: auto">
 
-      <div ref="catalog" class="nav nav-pills flex-column border-end col-3 p-3">
+      <div ref="catalog" class="nav nav-pills flex-column border-end overflow-hidden col-3 p-3">
         <a class="nav-link link-dark" href="#settings-1">General</a>
         <a class="nav-link link-dark" href="#settings-2">Danmaku</a>
         <a class="nav-link link-dark" href="#settings-3">Synchronization</a>

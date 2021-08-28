@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column" style="width: 100vw">
+  <div class="col-9 d-flex flex-column">
     <div class="d-flex flex-row align-items-center p-3" style="-webkit-app-region: drag">
       <Search></Search>
       <div class="d-flex flex-row-reverse" style="-webkit-app-region: no-drag">
@@ -8,17 +8,20 @@
     </div>
     <table class="table m-0 border-end no-select">
       <thead>
-        <tr> <th ref="wordHead">Word</th> <th>Paraphrase</th> </tr>
+        <tr> <th ref="wordHead" id="wordHead" :style="wordStyle">Word</th> <th>Paraphrase</th> </tr>
       </thead>
     </table>
     <div @scroll="scrollList" class="mb-auto" style="overflow-y: auto;">
-      <table class="table table-striped table-borderless">
-        <tbody ref="tableBody">
+      <table class="table table-striped table-borderless table-content">
+        <tbody>
           <tr v-for="(word, i) in words" :key="i" @click="clickWord(word)" @contextmenu="wordMenu($event, word)">
-            <td>{{ word.word }}</td>
+            <td :style="wordStyle">{{ word.word }}</td>
             <td>
-              <span class="paraphrase" :hide="quiz && !word.see">
+              <span v-if="!quiz || word.see">
                 {{ html2text(word.paraphrase) }}
+              </span>
+              <span v-else class="fst-italic text-secondary" style="opacity:0.4">
+                click to show the paraphrase
               </span>
             </td>
           </tr>
@@ -27,7 +30,7 @@
     </div>
     <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
       <button type="button" class="btn btn-primary me-2" :disabled="syncing" @click="clickSync">
-        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true" v-if="syncing"></span>
+        <span class="spinner-border spinner-border-sm" v-if="syncing"></span>
         {{ syncing ? 'Syncing...' : 'Sync' }}
       </button>
       <button type="button" class="btn me-2" :class="quiz ? 'btn-secondary' : 'btn-primary'" @click="clickQuiz">
@@ -57,6 +60,7 @@ export default {
 
   data() {
     return {
+      wordWidth: 150,
       quiz: false,
       syncing: false,
       dictionaries: [],
@@ -68,11 +72,7 @@ export default {
   },
 
   mounted() {
-    const tbody = this.$refs.tableBody;
-    new MutationObserver(this.resizeThead).observe(tbody, {
-      childList: true, characterData: true, subtree: true
-    });
-    new ResizeObserver(this.resizeThead).observe(tbody)
+    new ResizeObserver(this.resize).observe(this.$refs.wordHead);
   },
 
   methods: {
@@ -83,12 +83,8 @@ export default {
       this.dictionaries = settings.externalDictionaries;
     },
 
-    resizeThead() {
-      const tbody = this.$refs.tableBody;
-      const first = tbody && tbody.children[0];
-      if (first) {
-        this.$refs.wordHead.width = first.children[0].clientWidth;
-      }
+    resize() {
+      this.wordWidth = this.$refs.wordHead.clientWidth;
     },
 
     clickClose(e) {
@@ -163,18 +159,31 @@ export default {
       this.syncing = false;
     }
   },
+
+  computed: {
+    wordStyle() {
+      return {
+        width: this.wordWidth + 'px',
+      };
+    }
+  }
 }
 </script>
 
 <style scoped>
-.paraphrase {
-  transition-duration: 0.3s;
-  opacity: 1;
+.table-content {
+  table-layout: fixed;
+  width: 100%;
 }
 
-.paraphrase[hide] {
-  opacity: 0;
-  filter: blur(0.2em);
+td {
+  text-overflow: ellipsis;
+  white-space:nowrap;
+  overflow: hidden;
 }
 
+#wordHead {
+  resize: horizontal;
+  overflow: auto;
+}
 </style>
