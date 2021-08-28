@@ -62,7 +62,7 @@
             <tbody ref="tableBody">
               <tr class="has-edit" v-for="(word, i) in words" :key="i" @contextmenu="wordMenu($event, word)">
                 <td v-if="editingWord.word == word.word">
-                  <input class="form-control form-control-sm" v-model="editingWord.newWord" @keyup.enter="enterNewWord">
+                  <input class="form-control form-control-sm" id="wordEditor" v-model="editingWord.newWord" @keyup.enter="enterNewWord">
                 </td>
                 <td v-else>{{ word.word }}</td>
 
@@ -152,11 +152,14 @@ export default {
     };
   },
 
-  created() {
-    this.getPlans();
+  props: {
+    plan: String,
+    edit: String,
   },
 
   mounted() {
+    this.init();
+
     document.addEventListener('keyup', e => {
       if (e.key == 'Escape') {
         this.adding = false;
@@ -175,6 +178,13 @@ export default {
 
   methods: {
     html2text,
+
+    async init() {
+      await this.getPlans();
+      if (this.plan && this.edit) {
+        await this.setEdit(this.plan, this.edit);
+      }
+    },
 
     async getPlans() {
       this.plans = await ipcRenderer.invoke('getPlans');
@@ -227,9 +237,27 @@ export default {
       this.pages = before.concat(pages).concat(after);
     },
 
-    pageTo(page) {
+    async setEdit(plan, word) {
+      if (plan !== this.selectedPlan) {
+        this.clickPlan(plan);
+      }
+
+      const index = await ipcRenderer.invoke('getWordIndex', this.selectedPlan, word);
+      if (index < 0) {
+        return;
+      }
+
+      await this.pageTo(Math.ceil(index / this.pageSize));
+
+      const w = this.words.find(w => w.word == word);
+      if (w) {
+        this.editWord(w);
+      }
+    },
+
+    async pageTo(page) {
       this.page = page;
-      this.getWords();
+      await this.getWords();
     },
 
     pageItemCls(page) {
@@ -246,12 +274,12 @@ export default {
       return planId === this.selectedPlan ? 'active' : 'link-dark';
     },
 
-    clickPlan(plan) {
+    async clickPlan(plan) {
       this.page = 1;
       this.adding = false;
       this.selectedPlan = plan.id;
       this.editingWord = {};
-      this.getWords();
+      await this.getWords();
     },
 
     newEmptyPlan() {
@@ -276,13 +304,15 @@ export default {
       if (!path) return;
 
       const ext = extname(path);
-      if (ext !== '.csv') {
-        this.$emit('showToast', {content: 'File type should be .csv', delay: 3000});
-        return;
-      }
-
       this.newPlanCtx = { type: 'import_', name: basename(path, ext), path };
-      this.showPlanInput();
+      if (ext === '.csv') {
+        this.showPlanInput();
+      } else if (ext === '.json') {
+        this.newPlanCtx.name = '.'; // there's no need to enter the name, it's read from the json
+        await this.enterPlan();
+      } else {
+        this.$emit('showToast', {content: 'File type should be either .csv or .json', delay: 3000});
+      }
     },
 
     showPlanInput() {
@@ -321,8 +351,11 @@ export default {
 
     planMenu(e, plan) {
       const items = [
-        { name: 'Edit', action: () => this.editPlan(plan) },
+        { name: 'Rename', action: () => this.editPlan(plan) },
+        { name: 'Reset', action: () => this.resetPlan(plan) },
         { name: 'Delete', action: () => this.delPlan(plan) },
+        '----------------',
+        { name: 'Export', action: () => this.exportPlan(plan) },
       ];
       this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items});
     },
@@ -350,6 +383,24 @@ export default {
       ]);
     },
 
+    exportPlan(plan) {
+      ipcRenderer.invoke('exportPlan', plan.id);
+    },
+
+    resetPlan(plan) {
+      const tips = `Are you sure you want to reset plan "${plan.name}"? This will clear the learning progress of the plan`;
+      this.$emit('showAlert', 'Warning', tips, [
+        {text: 'Cancel', class: 'btn-secondary'},
+        {
+          text: 'Reset',
+          class: 'btn-danger',
+          onClick: async () => {
+            await ipcRenderer.invoke('resetPlan', plan.id);
+          },
+        }
+      ]);
+    },
+
     async modifyPlan() {
       await ipcRenderer.invoke('renamePlan', this.editingPlan.id, this.editingPlan.name);
       await this.getPlans();
@@ -360,14 +411,13 @@ export default {
       wordList.scrollTo(0, wordList.children[0].clientHeight);
     },
 
-    clickAdd() {
+    async clickAdd() {
       this.adding = !this.adding;
       if (this.adding) {
-        this.pageTo(this.pageNum);
-        this.$nextTick(() => {
-          this.scrollBottom();
-          this.$refs.wordInput.focus();
-        });
+        await this.pageTo(this.pageNum);
+        await this.$nextTick();
+        this.scrollBottom();
+        this.$refs.wordInput.focus();
       }
     },
 
@@ -398,7 +448,7 @@ export default {
 
       this.inputedWord = this.inputedParaphrase = '';
       this.$refs.wordInput.focus();
-      this.pageTo(this.pageNum);
+      await this.pageTo(this.pageNum);
       this.$nextTick(() => this.scrollBottom());
     },
 
@@ -412,6 +462,7 @@ export default {
 
     editWord(word) {
       this.editingWord = {...word, newWord: word.word};
+      this.$nextTick(() => document.getElementById('wordEditor').focus());
     },
 
     delWord(word) {

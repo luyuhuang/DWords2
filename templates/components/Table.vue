@@ -112,7 +112,7 @@ export default {
 
       const items = [
         { name: 'Detail', action: () => this.wordDetail(word) },
-        { name: 'Edit', action: () => {} },
+        { name: 'Edit', action: () => this.editWord(word) },
         '----------------',
         { name: `Mark as ${mark}`, action: () => this.toggleWordStatus(word) },
       ];
@@ -129,6 +129,14 @@ export default {
 
     wordDetail(word) {
       this.$emit('search', word.word);
+    },
+
+    editWord(word) {
+      const query = new URLSearchParams({
+        edit: word.word,
+        plan: word.plan_id,
+      }).toString();
+      this.$router.push(`/plans?${query}`);
     },
 
     toggleWordStatus(word) {

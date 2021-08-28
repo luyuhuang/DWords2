@@ -4,7 +4,7 @@ const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV } =
 const settings = require('./settings');
 const { synchronize } = require("./sync");
 const { dialog, app } = require("electron");
-const { readFile } = require("fs/promises");
+const { readFile, writeFile } = require("fs/promises");
 const path = require('path');
 
 
@@ -48,6 +48,14 @@ async function getWords(_, planID, limit=-1, offset=0) {
     return { count, words };
 }
 
+async function getWordIndex(_, planID, word) {
+    const res = await getUserDB().get(`with u as (
+        select row_number() over (order by time) as i, word
+        from words where plan_id = ? and not deleted)
+        select i from u where word = ?`, planID, word);
+    return res ? res.i - 1 : -1;
+}
+
 async function selectPlan(_, planID) {
     await setSys('currentPlan', planID);
 }
@@ -76,6 +84,19 @@ async function importCSV(id, plan) {
     }
 }
 
+async function importJSON(id, plan) {
+    const data = await readFile(plan.path, {encoding: 'utf8'});
+    const content = JSON.parse(data);
+    await getUserDB().run(`update plans set name = ? where id = ?`, content.name, id);
+
+    for (let word of content.words) {
+        await getUserDB().run(`insert or ignore into words
+            (plan_id, word, time, paraphrase, show_paraphrase, color, status, version)
+            values (?, ?, ?, ?, ?, ?, ?, ?)`,
+            id, word.word, word.time, word.paraphrase, word.show_paraphrase, word.color, word.status, Date.now());
+    }
+}
+
 const planInitializers = {
     async library(id, plan) {
         const dict = DICTIONARIES[plan.dict];
@@ -96,6 +117,8 @@ const planInitializers = {
         const planPath = plan.path;
         if (planPath.endsWith('.csv')) {
             await importCSV(id, plan);
+        } else if (planPath.endsWith('.json')) {
+            await importJSON(id, plan);
         } else {
             throw new Error('Unsupported file type');
         }
@@ -248,6 +271,7 @@ async function search(_, word) {
         if (!d) {
             d = {word};
         }
+        d.plan_id = planID;
         d.paraphrase = res.paraphrase;
         d.status = res.status;
     }
@@ -284,9 +308,12 @@ async function sync() {
 
 async function importPlan() {
     const file = await dialog.showOpenDialog(getMainWin(), {
+        defaultPath: app.getPath('home'),
         title: 'Import plan',
         properties: ['openFile'],
-        filters: [{extensions: ['csv']}],
+        filters: [
+            { name : "Plans", extensions: ['csv', 'json'] },
+        ],
     });
     if (file.filePaths.length > 0) {
         return file.filePaths[0];
@@ -294,26 +321,42 @@ async function importPlan() {
 }
 
 async function showAbout() {
-    await dialog.showMessageBox(getMainWin(), {
-        type: 'info',
-        title: 'About DWords',
-        icon: path.join(__dirname, '../assets/img/logo.png'),
-        message: 'DWords',
-        detail: [
-            `Version: ${app.getVersion()}`,
-            `Copyright (C) 2021, Luyu Huang`
-        ].join('\n'),
-        buttons: ['OK'],
-    });
+    app.showAboutPanel();
 }
 
 function exit() {
     app.quit();
 }
 
+async function exportPlan(_, id) {
+    const plan = await getUserDB().get(`select name from plans where id = ?`, id);
+    const words = await getUserDB().all(`select
+        word, time, paraphrase, show_paraphrase, color, status
+        from words where plan_id = ? and not deleted`, id);
+    plan.words = words;
+
+    const file = await dialog.showSaveDialog(getMainWin(), {
+        defaultPath: app.getPath('home'),
+        title: 'Export plan',
+        filters: [
+            { name : "Plans", extensions: ['json'] },
+        ],
+    });
+    if (file.filePath) {
+        await writeFile(file.filePath, JSON.stringify(plan));
+    }
+}
+
+async function resetPlan(_, id) {
+    await getUserDB().run(`update words set
+        show_paraphrase = null, color = null, status = 0, version = ?
+        where plan_id = ?`, Date.now(), id);
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
-    getWords, selectPlan, newPlan, renamePlan, delPlan, addWord, getWordList,
-    updateWord, delWord, consultDictionary, search, getSettings, updateSettings,
-    getWordsByPrefix, toggleDevTools, sync, importPlan, showAbout, exit,
+    getWords, getWordIndex, selectPlan, newPlan, renamePlan, delPlan, addWord,
+    getWordList, updateWord, delWord, consultDictionary, search, getSettings,
+    updateSettings, getWordsByPrefix, toggleDevTools, sync, importPlan, showAbout,
+    exit, exportPlan, resetPlan,
 }

@@ -25,7 +25,8 @@ const router = new VueRouter({
     },
     {
       path: '/plans',
-      component: Plans
+      component: Plans,
+      props: route => route.query
     },
     {
       path: '/statistics',

@@ -33,8 +33,8 @@
           </div>
 
           <div class="modal-footer p-2" v-if="result.status !== undefined">
-            <button class="btn btn-outline-secondary btn-sm me-2">Edit</button>
-            <button class="btn btn-outline-secondary btn-sm me-2">
+            <button class="btn btn-outline-secondary btn-sm me-2" @click="clickEdit">Edit</button>
+            <button class="btn btn-outline-secondary btn-sm me-2" @click="clickMark">
               Mark as {{ result.status === 0 ? 'memorized' : 'unmemorized' }}
             </button>
           </div>
@@ -99,6 +99,22 @@ export default {
       const dict = this.dictionaries[e.target.getAttribute('index')]
       shell.openExternal(dict.url + this.result.word);
     },
+
+    clickEdit() {
+      this.modal.hide();
+      const query = new URLSearchParams({
+        edit: this.result.word,
+        plan: this.result.plan_id,
+      }).toString();
+      this.$router.push(`/plans?${query}`);
+    },
+
+    clickMark() {
+      const res = this.result;
+      res.status = res.status === 1 ? 0 : 1;
+      ipcRenderer.invoke('updateWord', res.plan_id, res.word, {status: res.status});
+    },
+
   },
 
   watch: {
