@@ -178,7 +178,7 @@ export default {
 
 td {
   text-overflow: ellipsis;
-  white-space:nowrap;
+  white-space: nowrap;
   overflow: hidden;
 }
 

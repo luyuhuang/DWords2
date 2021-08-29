@@ -5,6 +5,7 @@ const { initSettings, watchSettings } = require('./settings');
 const { initSync } = require('./sync');
 const { getMainWin } = require('./utils');
 const path = require('path');
+const { getUserDB, getDictDB } = require('./database');
 
 function initDWords() {
     const dwords = {};
@@ -26,6 +27,10 @@ function initDWords() {
 function setAppEvents() {
     app.on('activate', showWindow);
     app.on('window-all-closed', () => {})
+    app.on('before-quit', () => {
+        getUserDB().close();
+        getDictDB().close();
+    });
 }
 
 function createMainWindow() {

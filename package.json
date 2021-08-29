@@ -2,7 +2,7 @@
   "name": "dwords2",
   "version": "0.0.1",
   "description": "Show words as Danmaku on the screen to help you memorize them",
-  "author": "luyuhuang",
+  "author": "Luyu Huang",
   "license": "MIT",
   "main": "src/main.js",
   "scripts": {
