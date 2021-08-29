@@ -1,15 +1,15 @@
 <template>
   <div class="d-flex flex-row justify-content-center col">
-    <div ref="searchBox" class="input-group input-group-sm" style="width: 17rem; -webkit-app-region: no-drag">
-      <input type="text" class="form-control" placeholder="Search" v-model="inputedWord" @keyup.enter="search(inputedWord)">
-      <button class="btn search-btn" @click="search(inputedWord)">
-        <i class="bi bi-search"></i>
-      </button>
+    <div class="search" style="-webkit-app-region: no-drag">
+      <i class="search-icon bi bi-search"></i>
+      <input ref="searchBox" type="text" class="search-box" placeholder="Search" v-model="inputedWord">
     </div>
 
     <div class="preview-list border shadow" v-if="candidates.length > 0">
       <div class="list-group list-group-flush">
-        <a class="list-group-item list-group-item-action" href="#" v-for="(word, i) in candidates" :key="i" @click="search(word)">
+        <a v-for="(word, i) in candidates" :key="i" class="list-group-item list-group-item-action"
+          :class="i === index ? 'active' : ''" href="#" @click="search(word)"
+        >
           {{ word }}
         </a>
       </div>
@@ -53,6 +53,7 @@ export default {
   data() {
     return {
       inputedWord: '',
+      index: -1,
       candidates: [],
       dictionaries: [],
 
@@ -68,8 +69,20 @@ export default {
     this.modal = new Modal(this.$refs.modal, {})
 
     document.addEventListener('keyup', e => {
-      if (e.key == 'Escape') {
+      if (e.key === 'Escape') {
         this.inputedWord = '';
+      } else if (e.key === 's' || e.key === '/') {
+        this.$refs.searchBox.focus();
+      } else if (e.key === 'ArrowDown') {
+        this.index = Math.min(this.index + 1, this.candidates.length - 1);
+      } else if (e.key === 'ArrowUp') {
+        this.index = Math.max(this.index - 1, Math.min(0, this.candidates.length - 1));
+      } else if (e.key === 'Enter') {
+        if (this.index >= 0) {
+          this.search(this.candidates[this.index]);
+        } else if (this.inputedWord) {
+          this.search(this.inputedWord);
+        }
       }
     });
     this.$parent.$on('search', this.search);
@@ -128,6 +141,7 @@ export default {
         } else {
           this.candidates = [];
         }
+        this.index = -1;
       }, 100);
     }
   }
@@ -135,15 +149,37 @@ export default {
 </script>
 
 <style scoped>
-.search-btn {
-  border-color: rgb(206, 212, 218);
+.search {
+  -webkit-app-region: no-drag;
+  position: relative;
+}
+
+.search-icon {
   color: gray;
+  position: absolute;
+  left: 0.5em;
+  padding: 0.25em;
+}
+
+.search-box {
+  height: 1em;
+  width: 17em;
+  border: none;
+  border-width: 0px;
+  background: #eff0f1;
+  border-radius: 1em;
+  padding: 1em;
+  padding-left: 2.2em;
+}
+
+.search-box:focus {
+  outline: none;
 }
 
 .preview-list {
   position: absolute;
   top: 55px;
-  width: 17rem;
+  width: 16rem;
   max-height: 90%;
   overflow-y: auto;
 }
