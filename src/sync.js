@@ -1,8 +1,8 @@
 const { createClient } = require('webdav');
 const { getUserDB } = require('./database');
-const { wait, compareVersions, parseCSV, getSys, toCSV, setSys } = require('./utils');
+const { wait, compareVersions, parseCSV, getSys, toCSV, setSys, getMainWin } = require('./utils');
 const migrateCloud = require('./migrateCloud');
-const { getSettings } = require('./settings');
+const { getSettings, getSetting } = require('./settings');
 const { app } = require('electron');
 
 const lockPath = key => `/.lock-${key}`;
@@ -33,6 +33,31 @@ const planFields = [
 function initSync(dwords) {
     dwords.syncing = false;
     dwords.migrated = false;
+
+    autoSync(dwords);
+}
+
+async function autoSync(dwords) {
+    try {
+        await synchronize(dwords);
+    } catch (e) {
+        console.error('sync err', e);
+    }
+
+    const interval = await getSetting('syncInterval') * 1000;
+    setTimeout(() => autoSync(dwords), interval);
+}
+
+function isSyncing(dwords) {
+    return dwords.syncing;
+}
+
+function setSyncing(dwords, syncing) {
+    dwords.syncing = syncing;
+    const win = getMainWin();
+    if (win) {
+        win.webContents.send('syncStatus', syncing);
+    }
 }
 
 async function lock(dav, key, timeout=Infinity) {
@@ -44,7 +69,9 @@ async function lock(dav, key, timeout=Infinity) {
         timeout -= Date.now() - now;
     }
     if (timeout <= 0) {
-        throw Error(`Timeout when locking ${key}, try again latter.`);
+        const e = Error(`Timeout when locking ${key}, try again latter.`);
+        e.name = 'lock';
+        throw e;
     }
 }
 
@@ -55,7 +82,13 @@ async function unlock(dav, key) {
 function withLock(dav, key, timeout, fn) {
     return lock(dav, key, timeout)
         .then(fn)
-        .finally(() => unlock(dav, key));
+        .then(() => unlock(dav, key))
+        .catch(e => {
+            if (e.name === 'lock') {
+                throw e;
+            }
+            unlock(dav, key)
+        });
 }
 
 async function migrate(dav) {
@@ -309,10 +342,10 @@ async function syncPlans(dav) {
 }
 
 async function synchronize(dwords) {
-    if (dwords.syncing) {
+    if (isSyncing(dwords)) {
         return;
     }
-    dwords.syncing = true;
+    setSyncing(dwords, true);
 
     try {
         console.log('synchronizing...');
@@ -338,7 +371,7 @@ async function synchronize(dwords) {
 
         console.log(`synchronize done`);
     } finally {
-        dwords.syncing = false;
+        setSyncing(dwords, false);
     }
 }
 

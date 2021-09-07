@@ -13,14 +13,9 @@
         </div>
 
         <div class="btn-group">
-          <button type="button" class="btn btn-sm btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+          <button type="button" class="btn btn-sm btn-outline-success" @click="newPlan">
             New Plan
           </button>
-          <ul class="dropdown-menu">
-            <li><a class="dropdown-item" @click="newEmptyPlan"><i class="bi bi-file-earmark me-2"></i>Empty Plan</a></li>
-            <li><a class="dropdown-item" @click="fromLibrary"><i class="bi bi-collection me-2"></i>From Library</a></li>
-            <li><a class="dropdown-item" @click="importPlan"><i class="bi bi-folder me-2"></i>Import...</a></li>
-          </ul>
         </div>
 
         <hr>
@@ -41,11 +36,6 @@
                   {{ plan.name }}
                 </div>
               </a>
-            </li>
-
-            <li class="nav-item p-1" v-if="planning">
-              <input class="form-control form-control-sm" placeholder="Plan Name" ref="planInput"
-                     v-model="newPlanCtx.name" @keyup.enter="$event.target.blur()" @blur="enterPlan">
             </li>
           </ul>
         </div>
@@ -107,7 +97,7 @@
       </div>
     </div>
 
-    <PlanLibrary @choose="chooseLibrary"></PlanLibrary>
+    <NewPlan @planCreated="getPlans"></NewPlan>
     <Alert></Alert>
     <Toast></Toast>
     <ContextMenu></ContextMenu>
@@ -117,17 +107,15 @@
 <script>
 import { html2text } from '../scripts/utils';
 import Title from '../components/Title.vue';
-import PlanLibrary from '../components/PlanLibrary.vue';
 import Alert from '../components/Alert.vue';
 import Toast from '../components/Toast.vue';
 import ContextMenu from '../components/ContextMenu.vue';
-import { DICTIONARIES } from '../../src/common';
-import { basename, extname } from 'path';
+import NewPlan from '../components/NewPlan.vue';
 
 const { ipcRenderer } = window.require('electron');
 
 export default {
-  components: {Title, PlanLibrary, Alert, Toast, ContextMenu},
+  components: {NewPlan, Title, Alert, Toast, ContextMenu},
   data() {
     return {
       wordWidth: 150,
@@ -141,9 +129,7 @@ export default {
       pageSize: 100,
       pages: [],
 
-      planning: false,
       adding: false,
-      newPlanCtx: {},
       inputedWord: '',
       inputedParaphrase: '',
 
@@ -163,7 +149,6 @@ export default {
     document.addEventListener('keyup', e => {
       if (e.key == 'Escape') {
         this.adding = false;
-        this.planning = false;
         this.editingPlan = {};
         this.editingWord = {};
       }
@@ -282,65 +267,8 @@ export default {
       await this.getWords();
     },
 
-    newEmptyPlan() {
-      this.newPlanCtx = {type: 'empty', name: ''};
-      this.showPlanInput();
-    },
-
-    fromLibrary() {
-      this.$emit('showPlanLibrary');
-    },
-
-    chooseLibrary(dict, tag, order) {
-      this.newPlanCtx = {
-        type: 'library', name: DICTIONARIES[dict].tags[tag],
-        dict, tag, order
-      }
-      this.showPlanInput();
-    },
-
-    async importPlan() {
-      const path = await ipcRenderer.invoke('importPlan');
-      if (!path) return;
-
-      const ext = extname(path);
-      this.newPlanCtx = { type: 'import_', name: basename(path, ext), path };
-      if (ext === '.csv') {
-        this.showPlanInput();
-      } else if (ext === '.json') {
-        this.newPlanCtx.name = '.'; // there's no need to enter the name, it's read from the json
-        await this.enterPlan();
-      } else {
-        this.$emit('showToast', {content: 'File type should be either .csv or .json', delay: 3000});
-      }
-    },
-
-    showPlanInput() {
-      this.planning = true;
-      this.$nextTick(() => this.$refs.planInput.focus());
-    },
-
-    async enterPlan() {
-      if (!this.newPlanCtx.name) return;
-
-      this.planning = false;
-      const content = `
-      <div class="spinner-border spinner-border-sm text-secondary">
-        <span class="visually-hidden">Loading...</span>
-      </div>
-      Creating Plan...`;
-      this.$emit('showToast', {
-        title: 'Waiting', content,
-        animation: false, autohide: false, position: 'RB'
-      });
-
-      const {id, err} = await ipcRenderer.invoke('newPlan', this.newPlanCtx);
-      if (err) {
-        this.$emit('showToast', {content: err, delay: 3000});
-      } else {
-        await this.getPlans();
-        this.$emit('hideToast');
-      }
+    newPlan() {
+      this.$emit('newPlan');
     },
 
     selectPlan() {

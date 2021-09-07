@@ -69,10 +69,16 @@ export default {
 
   created() {
     this.fetchSettings();
+    this.fetchSyncing();
   },
 
   mounted() {
     new ResizeObserver(this.resize).observe(this.$refs.wordHead);
+
+    ipcRenderer.on('syncStatus', (_, syncing) => this.syncing = syncing);
+    ipcRenderer.on('syncError', (_, err) => {
+      this.$emit('showToast', {content: err, delay: 3000});
+    });
   },
 
   methods: {
@@ -81,6 +87,10 @@ export default {
     async fetchSettings() {
       const settings = await ipcRenderer.invoke('getSettings', 'externalDictionaries');
       this.dictionaries = settings.externalDictionaries;
+    },
+
+    async fetchSyncing() {
+      this.syncing = await ipcRenderer.invoke('isSyncing');
     },
 
     resize() {
@@ -148,15 +158,7 @@ export default {
     },
 
     async clickSync() {
-      if (this.syncing) {
-        return;
-      }
-      this.syncing = true;
-      const err = await ipcRenderer.invoke('sync');
-      if (err) {
-        this.$emit('showToast', {content: err, delay: 3000});
-      }
-      this.syncing = false;
+      ipcRenderer.send('sync');
     }
   },
 

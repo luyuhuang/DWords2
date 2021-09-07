@@ -297,13 +297,15 @@ function toggleDevTools() {
     getMainWin().webContents.toggleDevTools();
 }
 
-async function sync() {
-    try {
-        await synchronize(this);
-    } catch(e) {
-        console.log('sync err', e);
-        return e;
-    }
+function sync(e) {
+    synchronize(this).catch(err => {
+        e.reply('syncError', err);
+        console.error('sync err', err);
+    });
+}
+
+async function isSyncing() {
+    return this.syncing;
 }
 
 async function importPlan() {
@@ -357,6 +359,6 @@ module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, getWordIndex, selectPlan, newPlan, renamePlan, delPlan, addWord,
     getWordList, updateWord, delWord, consultDictionary, search, getSettings,
-    updateSettings, getWordsByPrefix, toggleDevTools, sync, importPlan, showAbout,
-    exit, exportPlan, resetPlan,
+    updateSettings, getWordsByPrefix, toggleDevTools, sync, isSyncing, importPlan,
+    showAbout, exit, exportPlan, resetPlan,
 }
