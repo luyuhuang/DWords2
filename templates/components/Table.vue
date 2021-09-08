@@ -1,17 +1,12 @@
 <template>
-  <div class="col-9 d-flex flex-column">
-    <div class="d-flex flex-row align-items-center p-3" style="-webkit-app-region: drag">
-      <Search></Search>
-      <div class="d-flex flex-row-reverse" style="-webkit-app-region: no-drag">
-        <button type="button" class="btn-close" @click="clickClose"></button>
-      </div>
-    </div>
+  <div class="d-flex flex-column" style="flex: 1; overflow-y: auto">
     <table class="table m-0 border-end no-select">
       <thead>
         <tr> <th ref="wordHead" id="wordHead" :style="wordStyle">Word</th> <th>Paraphrase</th> </tr>
       </thead>
     </table>
-    <div @scroll="scrollList" class="mb-auto" style="overflow-y: auto;">
+
+    <div @scroll="scrollList" class="mb-auto" style="flex: 1; overflow-y: auto">
       <table class="table table-striped table-borderless table-content">
         <tbody>
           <tr v-for="(word, i) in words" :key="i" @click="clickWord(word)" @contextmenu="wordMenu($event, word)">
@@ -28,24 +23,12 @@
         </tbody>
       </table>
     </div>
-    <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
-      <button type="button" class="btn btn-primary me-2" :disabled="syncing" @click="clickSync">
-        <span class="spinner-border spinner-border-sm" v-if="syncing"></span>
-        {{ syncing ? 'Syncing...' : 'Sync' }}
-      </button>
-      <button type="button" class="btn me-2" :class="quiz ? 'btn-secondary' : 'btn-primary'" @click="clickQuiz">
-        {{quiz ? 'Back' : 'Quiz'}}
-      </button>
-    </div>
 
-    <Toast></Toast>
     <ContextMenu></ContextMenu>
   </div>
 </template>
 
 <script>
-import Search from './Search.vue';
-import Toast from '../components/Toast.vue'
 import ContextMenu from '../components/ContextMenu.vue'
 import { html2text } from '../scripts/utils';
 const { ipcRenderer, shell } = window.require("electron");
@@ -53,32 +36,24 @@ const { ipcRenderer, shell } = window.require("electron");
 export default {
   name: 'Table',
   props: {
-    words: Array,
+    words: Array, quiz: Boolean,
   },
 
-  components: {Search, Toast, ContextMenu},
+  components: { ContextMenu },
 
   data() {
     return {
       wordWidth: 150,
-      quiz: false,
-      syncing: false,
       dictionaries: [],
     };
   },
 
   created() {
     this.fetchSettings();
-    this.fetchSyncing();
   },
 
   mounted() {
     new ResizeObserver(this.resize).observe(this.$refs.wordHead);
-
-    ipcRenderer.on('syncStatus', (_, syncing) => this.syncing = syncing);
-    ipcRenderer.on('syncError', (_, err) => {
-      this.$emit('showToast', {content: err, delay: 3000});
-    });
   },
 
   methods: {
@@ -89,24 +64,8 @@ export default {
       this.dictionaries = settings.externalDictionaries;
     },
 
-    async fetchSyncing() {
-      this.syncing = await ipcRenderer.invoke('isSyncing');
-    },
-
     resize() {
       this.wordWidth = this.$refs.wordHead.clientWidth;
-    },
-
-    clickClose(e) {
-      e.target.blur();
-      ipcRenderer.send('close');
-    },
-
-    clickQuiz() {
-      this.quiz = !this.quiz;
-      for (const word of this.words) {
-        word.see = false;
-      }
     },
 
     clickWord(word) {
@@ -134,7 +93,7 @@ export default {
     },
 
     wordDetail(word) {
-      this.$emit('search', word.word);
+      this.$parent.$emit('search', word.word);
     },
 
     editWord(word) {
@@ -156,10 +115,6 @@ export default {
         this.$emit('needMore');
       }
     },
-
-    async clickSync() {
-      ipcRenderer.send('sync');
-    }
   },
 
   computed: {

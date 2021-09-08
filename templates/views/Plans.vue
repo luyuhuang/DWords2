@@ -125,9 +125,9 @@ export default {
 
       words: [],
       page: 1,
-      pageNum: 0,
+      pageNum: 1,
       pageSize: 100,
-      pages: [],
+      pages: [1],
 
       adding: false,
       inputedWord: '',
@@ -177,6 +177,11 @@ export default {
       if (this.currentPlan && !this.selectedPlan) {
         this.selectedPlan = this.currentPlan;
         this.getWords();
+      }
+      if (!this.currentPlan) {
+        this.words = [];
+        this.pageNum = this.page = 1;
+        this.pages = [1];
       }
     },
 
