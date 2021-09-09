@@ -102,11 +102,12 @@ const planInitializers = {
         const dict = DICTIONARIES[plan.dict];
         const tag = `%${plan.tag}%`;
         const words = await getDictDB().all(`
-            select word, row_number() over () as time, ${dict.field} as paraphrase
+            select word, ${dict.field} as paraphrase,
+            row_number() over (order by ${plan.order}) as time
             from ${dict.table} where tag like ? order by ${plan.order}`, tag);
 
         const now = Date.now();
-        for ({word, time, paraphrase} of words) {
+        for (const {word, time, paraphrase} of words) {
             await getUserDB().run(`insert into words
                 (plan_id, word, time, paraphrase, version) values (?, ?, ?, ?, ?)`,
                 id, word, time, paraphrase, now);

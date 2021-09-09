@@ -1,5 +1,5 @@
 <template>
-  <div id="widget" class="d-flex flex-row" style="width: 100vw; height: 100vh">
+  <div id="widget" class="d-flex flex-row" style="width: 100vw; height: 100vh" v-if="inited">
     <SideBar :currentTab="currentTab" @onChangeTab="onChangeTab"></SideBar>
 
     <div class="col-9 d-flex flex-column">
@@ -10,7 +10,7 @@
         </div>
       </div>
 
-      <div v-if="!currentPlan" class="d-flex flex-column justify-content-center text-center" style="flex:1">
+      <div v-if="!currentPlan" class="d-flex flex-column justify-content-center text-center no-select" style="flex:1">
         <h1 class="mb-3" style="font-size:3rem">Welcome!</h1>
         <p class="text-secondary">These are currently no plans</p>
         <div>
@@ -20,7 +20,9 @@
         </div>
       </div>
 
-      <div v-else-if="words.length <= 0 && currentTab === 'Current'" class="d-flex flex-column justify-content-center text-center" style="flex:1">
+      <div v-else-if="words.length <= 0 && currentTab === 'Current'"
+           class="d-flex flex-column justify-content-center text-center no-select"
+           style="flex:1">
         <h1 class="mb-3" style="font-size:3rem">Congratulations!</h1>
         <p class="text-secondary">
           You have memorized all the words of the plan!<br>
@@ -33,7 +35,7 @@
         </div>
       </div>
 
-      <Table v-else :words="words" :quiz="quiz" @needMore="appendWordList">
+      <Table v-else :words="words" :quiz="quiz" @needMore="needMore">
       </Table>
 
       <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
@@ -69,7 +71,8 @@ export default {
       appending: false,
       quiz: false,
       syncing: false,
-      currentPlan: 'null',
+      currentPlan: null,
+      inited: false,
     };
   },
 
@@ -82,12 +85,17 @@ export default {
       this.$emit('showToast', {content: err, delay: 3000});
     });
 
-    this.fetchCurrPlan();
-    this.fetchSyncing();
-    this.setWordList();
+    this.init();
   },
 
   methods: {
+    async init() {
+      await this.fetchCurrPlan();
+      await this.fetchSyncing();
+      await this.setWordList();
+      this.inited = true;
+    },
+
     async fetchCurrPlan() {
       this.currentPlan = await ipcRenderer.invoke('getCurrentPlan');
     },
@@ -96,17 +104,21 @@ export default {
       this.syncing = await ipcRenderer.invoke('isSyncing');
     },
 
-    async appendWordList() {
+    async appendWordList(words) {
+      const res = await ipcRenderer.invoke('getWordList', this.currentTab, 100, words.length);
+      words.push(...res.map(word => (word.see = false, word)));
+      return words;
+    },
+
+    async needMore() {
       if (this.appending) return;
       this.appending = true;
-      const words = await ipcRenderer.invoke('getWordList', this.currentTab, 100, this.words.length);
-      this.words.push(...words.map(word => (word.see = false, word)));
+      await this.appendWordList(this.words);
       this.appending = false;
     },
 
     async setWordList() {
-      this.words = [];
-      await this.appendWordList();
+      this.words = await this.appendWordList([])
     },
 
     onChangeTab(tab) {
@@ -146,9 +158,3 @@ export default {
   },
 };
 </script>
-
-<style scoped>
-.no-select {
-  user-select: none;
-}
-</style>

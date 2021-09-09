@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column" style="user-select: none; height: 100vh">
+  <div class="d-flex flex-column no-select" style="height: 100vh">
     <Title title="Settings"></Title>
 
     <div class="d-flex flex-row" style="flex: 1; overflow-y: auto">

@@ -1,9 +1,9 @@
 <template>
-  <div class="d-flex flex-column" style="user-select: none; height: 100vh">
+  <div class="d-flex flex-column" style="height: 100vh">
     <Title title="Plans"></Title>
 
     <div class="d-flex flex-row" style="flex: 1; overflow-y: auto">
-      <div class="col-3 d-flex flex-column border-end p-3">
+      <div class="col-3 d-flex flex-column border-end p-3 no-select">
 
         <div class="input-group input-group-sm mb-2">
           <span class="input-group-text">Current</span>
@@ -74,7 +74,7 @@
           </table>
         </div>
 
-        <div v-if="selectedPlan" class="border-top d-flex flex-row p-2 align-items-center">
+        <div v-if="selectedPlan" class="border-top d-flex flex-row p-2 align-items-center no-select">
           <nav class="col">
             <ul class="pagination m-0 justify-content-center">
               <li class="page-item" :class="page === 1 ? 'disabled' : ''">

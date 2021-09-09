@@ -1,5 +1,5 @@
 <template>
-  <div class="position-fixed m-3" :class="cls">
+  <div class="position-fixed m-3 no-select" :class="cls">
     <div ref="toast" class="toast">
       <div class="toast-header" v-if="title || subTitle">
         <strong class="me-auto">{{ title }}</strong>

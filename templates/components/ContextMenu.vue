@@ -1,5 +1,5 @@
 <template>
-  <div ref="menu" class="context-menu" tabindex="0" :style="menuStyle" v-if="show" @blur="focusOut">
+  <div ref="menu" class="context-menu no-select" tabindex="0" :style="menuStyle" v-if="show" @blur="focusOut">
     <ul ref="dropdown" class="dropdown-menu pt-1 pb-1 show shadow">
       <li v-for="(item, i) in items" :key="i">
         <hr v-if="/^---+/.test(item)" class="m-1">
