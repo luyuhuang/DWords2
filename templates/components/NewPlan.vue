@@ -25,7 +25,7 @@
             </div>
           </div>
 
-          <div v-if="currType === 'library'">
+          <template v-if="currType === 'library'">
             <div class="mb-2">
               <span class="form-label">Dictionary</span>
               <select class="form-select form-select-sm" :class="invalidDict" v-model="dictionary" required>
@@ -54,21 +54,21 @@
               </select>
             </div>
 
-          </div>
+          </template>
 
-          <div v-else-if="currType === 'empty'"></div>
+          <template v-else-if="currType === 'empty'"></template>
 
-          <div v-else-if="currType === 'import_'">
-            <div class="input-group has-validation">
+          <template v-else-if="currType === 'import_'">
+            <div class="input-group has-validation mb-2">
               <input type="text" class="form-control" :class="invalidPath" placeholder="Choose a file" v-model="path" disabled>
               <button class="btn btn-outline-secondary" type="button" @click="clickOpen">Open...</button>
               <div class="invalid-feedback">
                 Please choose a file.
               </div>
             </div>
-          </div>
+          </template>
 
-          <div class="alert alert-danger" v-if="error">{{ error }}</div>
+          <div class="alert alert-danger mb-0" v-if="error">{{ error }}</div>
 
         </div>
 

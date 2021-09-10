@@ -174,6 +174,7 @@ async function addWord(_, planID, word, time, paraphrase) {
         (plan_id, word, time, paraphrase, version) values (?, ?, ?, ?, ?)`,
         planID, word, time, paraphrase, Date.now());
 
+    getMainWin().webContents.send('refreshList');
     return true;
 }
 

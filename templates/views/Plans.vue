@@ -51,15 +51,18 @@
           <table class="table table-striped table-borderless table-content">
             <tbody ref="tableBody">
               <tr class="has-edit" v-for="(word, i) in words" :key="i" @contextmenu="wordMenu($event, word)">
-                <td v-if="editingWord.word == word.word" :style="wordStyle">
-                  <input class="form-control form-control-sm" id="wordEditor" v-model="editingWord.newWord" @keyup.enter="enterNewWord">
-                </td>
-                <td v-else :style="wordStyle">{{ word.word }}</td>
-
-                <td v-if="editingWord.word == word.word">
-                  <input class="form-control form-control-sm" id="paraphraseEditor" v-model="editingWord.paraphrase" @keyup.enter="enterNewParaphrase">
-                </td>
-                <td v-else>{{ html2text(word.paraphrase) }}</td>
+                <template v-if="editingWord.word == word.word">
+                  <td :style="wordStyle">
+                    <input class="form-control form-control-sm" id="wordEditor" v-model="editingWord.newWord" @keyup.enter="enterNewWord">
+                  </td>
+                  <td>
+                    <input class="form-control form-control-sm" id="paraphraseEditor" v-model="editingWord.paraphrase" @keyup.enter="enterNewParaphrase">
+                  </td>
+                </template>
+                <template v-else>
+                  <td :style="wordStyle">{{ word.word }}</td>
+                  <td>{{ html2text(word.paraphrase) }}</td>
+                </template>
               </tr>
               <tr v-if="adding">
                 <td :style="wordStyle">

@@ -65,7 +65,7 @@ async function lock(dav, key, timeout=Infinity) {
     const option = {overwrite: false};
     const now = Date.now();
     while (timeout > 0 && !(await dav.putFileContents(path, '.', option))) {
-        wait(1000);
+        await wait(1000);
         timeout -= Date.now() - now;
     }
     if (timeout <= 0) {

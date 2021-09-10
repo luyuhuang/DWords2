@@ -4,7 +4,7 @@
 
     <div class="col-9 d-flex flex-column">
       <div class="d-flex flex-row align-items-center p-3" style="-webkit-app-region: drag">
-        <Search></Search>
+        <Search :currentPlan="currentPlan"></Search>
         <div class="d-flex flex-row-reverse" style="-webkit-app-region: no-drag">
           <button type="button" class="btn-close" @click="clickClose"></button>
         </div>

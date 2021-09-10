@@ -32,11 +32,14 @@
             </div>
           </div>
 
-          <div class="modal-footer p-2" v-if="result.status !== undefined">
+          <div v-if="result.status !== undefined" class="modal-footer p-2">
             <button class="btn btn-outline-secondary btn-sm me-2" @click="clickEdit">Edit</button>
             <button class="btn btn-outline-secondary btn-sm me-2" @click="clickMark">
               Mark as {{ result.status === 0 ? 'memorized' : 'unmemorized' }}
             </button>
+          </div>
+          <div v-else-if="currentPlan" class="modal-footer p-2">
+            <button class="btn btn-outline-secondary btn-sm me-2" @click="addToPlan">Add to Plan</button>
           </div>
         </div>
       </div>
@@ -59,6 +62,10 @@ export default {
 
       result: {},
     }
+  },
+
+  props: {
+    currentPlan: String,
   },
 
   created() {
@@ -128,6 +135,11 @@ export default {
       ipcRenderer.invoke('updateWord', res.plan_id, res.word, {status: res.status});
     },
 
+    async addToPlan() {
+      const res = this.result;
+      await ipcRenderer.invoke('addWord', this.currentPlan, res.word, Date.now(), res.paraphrase);
+      await this.search(res.word);
+    },
   },
 
   watch: {
