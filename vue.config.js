@@ -12,5 +12,10 @@ module.exports = {
             template: 'templates/danmaku.html',
             filename: 'danmaku.html',
         },
+        about: {
+            entry: 'templates/about.js',
+            template: 'templates/about.html',
+            filename: 'about.html',
+        },
     }
 }

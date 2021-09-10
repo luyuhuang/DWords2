@@ -3,7 +3,7 @@ const { getUserDB, getDictDB } = require("./database");
 const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV } = require("./utils");
 const settings = require('./settings');
 const { synchronize } = require("./sync");
-const { dialog, app } = require("electron");
+const { dialog, app, BrowserWindow } = require("electron");
 const { readFile, writeFile } = require("fs/promises");
 const path = require('path');
 
@@ -325,7 +325,21 @@ async function importPlan() {
 }
 
 async function showAbout() {
-    app.showAboutPanel();
+    const about = new BrowserWindow({
+        show: false,
+        width: 300,
+        height: 250,
+        resizable: false,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+        },
+        minimizable: false,
+        maximizable: false,
+        parent: getMainWin(),
+    });
+    await about.loadFile('renderer/about.html', {query: {version: app.getVersion()}});
+    about.show();
 }
 
 function exit() {

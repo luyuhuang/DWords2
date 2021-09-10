@@ -25,7 +25,7 @@
            style="flex:1">
         <h1 class="mb-3" style="font-size:3rem">Congratulations!</h1>
         <p class="text-secondary">
-          You have memorized all the words of the plan!<br>
+          You have memorized all the words in the plan!<br>
           You can start a new plan or add words.
         </p>
         <div>
