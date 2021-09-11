@@ -42,4 +42,4 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         $version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        hub release create -a dist/DWords-$version.exe -m "v$version" "v$version"
+        hub release create -a dist/DWords-Setup-$version.exe -m "v$version" "v$version"
