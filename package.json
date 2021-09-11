@@ -11,7 +11,7 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "pack": "yarn build && electron-builder --dir",
-    "dist": "yarn build && electron-builder"
+    "dist": "yarn build && electron-builder --publish never"
   },
   "build": {
     "appId": "tech.luyuhuang.dwords2",
@@ -22,8 +22,7 @@
     },
     "files": [
       "!/templates"
-    ],
-    "publish": [{"provider": "github"}]
+    ]
   },
   "devDependencies": {
     "@vue/cli-plugin-router": "^4.5.13",
