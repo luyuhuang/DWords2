@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Show words as Danmaku on the screen to help you memorize them",
   "author": "Luyu Huang",
+  "repository": "https://github.com/luyuhuang/DWords2.git",
   "license": "MIT",
   "main": "src/main.js",
   "scripts": {
@@ -21,7 +22,8 @@
     },
     "files": [
       "!/templates"
-    ]
+    ],
+    "publish": [{"provider": "github"}]
   },
   "devDependencies": {
     "@vue/cli-plugin-router": "^4.5.13",

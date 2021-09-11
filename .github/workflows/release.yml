@@ -6,9 +6,9 @@ on:
     - 'v*'
 
 jobs:
-  macos:
+  release:
     name: Release macOS
-    runs-on: macos-latest
+    runs-on: [macos-latest, windows-latest]
     steps:
     - name: Checkout
       uses: actions/checkout@v2
@@ -17,31 +17,7 @@ jobs:
       with:
         node-version: 14.x
     - run: yarn
-    - run: yarn dist
     - name: Release
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        set -x
-        version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        hub release create "dist/DWords-$version.dmg" -m "v$version" "v$version"
-
-  windows:
-    name: Release Windows
-    runs-on: windows-latest
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-    - name: Install Node
-      uses: actions/setup-node@v1
-      with:
-        node-version: 14.x
-    - run: yarn
-    - run: yarn dist
-    - name: Release
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        set -x
-        version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        hub release create "dist/DWords-$version.exe" -m "v$version" "v$version"
+      run: yarn dist
