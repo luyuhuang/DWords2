@@ -22,9 +22,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        set -x
         version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        hub release create "dist/DWords-$version.dmg" -m "v$version" "v$version"
+        hub release create -a dist/DWords-$version.dmg -m "v$version" "v$version"
 
   windows:
     name: Release Windows
@@ -42,6 +41,5 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        set -x
-        version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        hub release create "dist/DWords-$version.exe" -m "v$version" "v$version"
+        $version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
+        hub release create -a dist/DWords-$version.exe -m "v$version" "v$version"
