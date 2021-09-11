@@ -36,7 +36,7 @@ jobs:
       run: |
         version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
         tag_name="${GITHUB_REF##*/}"
-        hub release edit -a dist/DWords-$version.dmg "$tag_name"
+        hub release edit -a dist/DWords-$version.dmg -m "$tag_name" "$tag_name"
 
   windows:
     name: Release Windows
@@ -55,5 +55,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         $version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        $tag_name=$GITHUB_REF.split("/")[-1]
-        hub release edit -a "dist\DWords Setup $version.exe" "$tag_name"
+        $tag_name=$Env:GITHUB_REF.split("/")[-1]
+        hub release edit -a "dist\DWords Setup $version.exe" -m "$tag_name" "$tag_name"
