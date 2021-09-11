@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu, shell } = require('electron');
 const { initDanmaku } = require('./danmaku');
 const ipc = require('./ipc');
 const { initSettings, watchSettings } = require('./settings');
@@ -60,7 +60,29 @@ function showWindow() {
 }
 
 function setMenu() {
-    // Menu.setApplicationMenu(new Menu);
+    Menu.setApplicationMenu(Menu.buildFromTemplate([
+        {
+            label: 'DWords',
+            role: 'appMenu',
+            submenu: Menu.buildFromTemplate([
+                { label: 'About', click: ipc.showAbout },
+                { label: 'Quit DWords', role: 'quit' },
+            ]),
+        },
+        {
+            label: 'Edit',
+            role: 'editMenu',
+        },
+        {
+            label: 'Help',
+            role: 'help',
+            submenu: Menu.buildFromTemplate([
+                { label: 'Homepage', click: () => shell.openExternal('https://github.com/luyuhuang/DWords2') },
+                { label: 'Report Issue', click: () => shell.openExternal('https://github.com/luyuhuang/DWords2/issues/new') },
+                { role: 'toggleDevTools' },
+            ]),
+        }
+    ]));
 }
 
 function setTray(dwords) {

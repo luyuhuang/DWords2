@@ -328,7 +328,7 @@ async function showAbout() {
     const about = new BrowserWindow({
         show: false,
         width: 300,
-        height: 250,
+        height: 260,
         resizable: false,
         webPreferences: {
             nodeIntegration: true,

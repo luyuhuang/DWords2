@@ -29,6 +29,10 @@ function toCSV(fields, list) {
     }).join(',')).join('\n');
 }
 
+function isNewLine(csv, i) {
+    return csv[i] === '\n' || csv.substr(i, 2) === '\r\n';
+}
+
 function parseCSVField(csv, i) {
     if (csv[i] === '"') {
         ++i;
@@ -48,13 +52,13 @@ function parseCSVField(csv, i) {
             throw new Error(`invalid CSV: unclosed quote at ${i}`);
         }
         ++i;
-        if (i < csv.length && csv[i] !== ',' && csv[i] !== '\n') {
+        if (i < csv.length && csv[i] !== ',' && !isNewLine(csv, i)) {
             throw Error(`invalid CSV: except ',' at ${i}`);
         }
         return [ans, i];
     } else {
         let j = i;
-        while (i < csv.length && csv[i] !== ',' && csv[i] !== '\n') {
+        while (i < csv.length && csv[i] !== ',' && !isNewLine(csv, i)) {
             ++i;
         }
         return [csv.substr(j, i - j), i];
@@ -67,13 +71,13 @@ function* parseCSV(fields, csv) {
     for (let i = 0; i < csv.length; ++i) {
         const obj = {};
         let index = 0;
-        while (i < csv.length && csv[i] !== '\n') {
+        while (i < csv.length && !isNewLine(csv, i)) {
             const [value, j] = parseCSVField(csv, i);
             set(obj, fields[index++], value);
             i = j;
             if (i < csv.length && csv[i] === ',') {
                 ++i;
-                if (i >= csv.length || csv[i] == '\n') {
+                if (i >= csv.length || isNewLine(csv, i)) {
                     set(obj, fields[index++], '');
                 }
             }
