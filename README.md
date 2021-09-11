@@ -14,7 +14,7 @@ Show words as Danmaku on the screen to help you memorize them.
 
 DWords is a desktop application that displays words as Danmaku (floating scroll messages) on your screen. This will repeat words in front of you over and over again to help you memorize them when using the computer. DWords is developed using [Electron][electron] + [Vue][vue] + [Bootstrap][bootstrap] and supports both Windows and macOS.
 
-DWords 是一个桌面应用, 它将单词以弹幕的形式显示在屏幕上. 这将一遍又一遍地在你眼前重复展示单词来帮助你在使用电脑的过程中记住他们. DWords 使用 [Electron][electron] + [Vue][vue] + [Bootstrap][bootstrap] 开发, 同时支持 Windows 和 MacOS.
+DWords 是一个桌面应用, 它将单词以弹幕的形式显示在屏幕上. 这将一遍又一遍地在你眼前重复展示单词来帮助你在使用电脑的过程中记住他们. DWords 使用 [Electron][electron] + [Vue][vue] + [Bootstrap][bootstrap] 开发, 同时支持 Windows 和 macOS.
 
 [electron]: https://www.electronjs.org/
 [vue]: https://vuejs.org/

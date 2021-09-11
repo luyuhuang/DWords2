@@ -17,7 +17,7 @@
     "productName": "DWords",
     "asar": false,
     "mac": {
-      "category": "your.app.category.type"
+      "category": "public.app-category.education"
     },
     "files": [
       "!/templates"
