@@ -6,6 +6,16 @@ on:
     - 'v*'
 
 jobs:
+  create:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Create a release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        tag_name="${GITHUB_REF##*/}"
+        hub release create -m "$tag_name" "$tag_name"
+
   macos:
     name: Release macOS
     runs-on: macos-latest
@@ -23,7 +33,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        hub release create -a dist/DWords-$version.dmg -m "v$version" "v$version"
+        tag_name="${GITHUB_REF##*/}"
+        hub release edit -a dist/DWords-$version.dmg "$tag_name"
 
   windows:
     name: Release Windows
@@ -42,4 +53,5 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         $version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
-        hub release create -a "dist\DWords Setup $version.exe" -m "v$version" "v$version"
+        $tag_name=$GITHUB_REF.split("/")[-1]
+        hub release edit -a "dist\DWords Setup $version.exe" "$tag_name"
