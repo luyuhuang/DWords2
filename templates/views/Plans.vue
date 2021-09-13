@@ -149,19 +149,27 @@ export default {
   mounted() {
     this.init();
 
-    document.addEventListener('keyup', e => {
+    document.addEventListener('keyup', this.onKeyUp);
+
+    this.resizeObserver = new ResizeObserver(this.resize);
+    this.resizeObserver.observe(this.$refs.wordHead);
+  },
+
+  destroyed() {
+    this.resizeObserver.disconnect();
+    document.removeEventListener('keyup', this.onKeyUp);
+  },
+
+  methods: {
+    html2text,
+
+    onKeyUp(e) {
       if (e.key == 'Escape') {
         this.adding = false;
         this.editingPlan = {};
         this.editingWord = {};
       }
-    });
-
-    new ResizeObserver(this.resize).observe(this.$refs.wordHead);
-  },
-
-  methods: {
-    html2text,
+    },
 
     resize() {
       this.wordWidth = this.$refs.wordHead.clientWidth;

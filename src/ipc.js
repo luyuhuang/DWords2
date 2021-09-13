@@ -20,8 +20,10 @@ function setIgnoreMouseEvents(event, ignore, options) {
 
 function setWinSize(event, width, height) {
     const win = getWinByWebContentsID(event.sender.id);
-    win.setMinimumSize(width, height);
-    win.setSize(width, height);
+    if (win) {
+        win.setMinimumSize(width, height);
+        win.setSize(width, height);
+    }
 }
 
 function moveWin(event, dx, dy) {
@@ -328,7 +330,7 @@ async function showAbout() {
     const about = new BrowserWindow({
         show: false,
         width: 300,
-        height: 260,
+        height: 261,
         resizable: false,
         webPreferences: {
             nodeIntegration: true,
@@ -339,6 +341,7 @@ async function showAbout() {
         parent: getMainWin(),
     });
     await about.loadFile('renderer/about.html', {query: {version: app.getVersion()}});
+    about.setMenu(null);
     about.show();
 }
 

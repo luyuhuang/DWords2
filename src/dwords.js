@@ -27,9 +27,11 @@ function initDWords() {
 function setAppEvents() {
     app.on('activate', showWindow);
     app.on('window-all-closed', () => {})
-    app.on('before-quit', () => {
-        getUserDB().close();
-        getDictDB().close();
+    app.once('before-quit', async (e) => {
+        e.preventDefault();
+        await getUserDB().close();
+        await getDictDB().close();
+        app.quit();
     });
 }
 

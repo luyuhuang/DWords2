@@ -75,7 +75,16 @@ export default {
   mounted() {
     this.modal = new Modal(this.$refs.modal, {})
 
-    document.addEventListener('keyup', e => {
+    document.addEventListener('keyup', this.onKeyUp);
+    this.$parent.$on('search', this.search);
+  },
+
+  destroyed() {
+    document.removeEventListener('keyup', this.onKeyUp);
+  },
+
+  methods: {
+    onKeyUp(e) {
       if (e.key === 'Escape') {
         this.inputedWord = '';
       } else if (e.key === 's' || e.key === '/') {
@@ -91,11 +100,8 @@ export default {
           this.search(this.inputedWord);
         }
       }
-    });
-    this.$parent.$on('search', this.search);
-  },
+    },
 
-  methods: {
     async search(word) {
       const res = await ipcRenderer.invoke('search', word);
       if (res) {

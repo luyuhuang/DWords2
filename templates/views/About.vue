@@ -1,6 +1,6 @@
 <template>
   <div ref="widget" class="text-center p-2 no-select">
-    <img src="../../assets/img/logo.png" class="mb-1" width="80" height="80" />
+    <img src="../../assets/img/logo.svg" class="mb-1" width="80" height="80" />
     <h2 class="mb-2">DWords</h2>
     <div class="content mb-2">Copyright (c) 2021 Luyu Huang</div>
     <div class="content">Version: {{ version }} | <a href="#" @click="clickHomepage">Homepage</a></div>

@@ -53,7 +53,12 @@ export default {
   },
 
   mounted() {
-    new ResizeObserver(this.resize).observe(this.$refs.wordHead);
+    this.resizeObserver = new ResizeObserver(this.resize);
+    this.resizeObserver.observe(this.$refs.wordHead);
+  },
+
+  destroyed() {
+    this.resizeObserver.disconnect();
   },
 
   methods: {

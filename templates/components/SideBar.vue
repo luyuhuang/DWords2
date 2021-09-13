@@ -1,7 +1,7 @@
 <template>
   <div class="col-3 d-flex flex-column bg-light border-end no-select">
     <div class="d-flex align-items-center p-4 pb-1" style="-webkit-app-region: drag">
-      <img src="../../assets/img/logo.png" width="60" height="60" />
+      <img src="../../assets/img/logo.svg" width="60" height="60" />
       <strong class="fs-4 ms-2 overflow-hidden">DWords</strong>
     </div>
 
