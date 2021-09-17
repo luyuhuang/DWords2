@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import { Toast } from 'bootstrap'
+import { Toast } from 'bootstrap';
 
 export default {
   data() {
@@ -31,7 +31,7 @@ export default {
   },
 
   methods: {
-    showToast(option={}) {
+    showToast(option = {}) {
       this.position = option.position || 'T';
       this.title = option.title;
       this.subTitle = option.subTitle;
@@ -57,8 +57,10 @@ export default {
           return 'bottom-0 start-0';
         case 'RB':
           return 'bottom-0 end-0';
+        default:
+          return '';
       }
     }
   }
-}
+};
 </script>

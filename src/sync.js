@@ -60,7 +60,7 @@ function setSyncing(dwords, syncing) {
     }
 }
 
-async function lock(dav, key, timeout=Infinity) {
+async function lock(dav, key, timeout = Infinity) {
     const path = lockPath(key);
     const option = {overwrite: false};
     const now = Date.now();
@@ -87,13 +87,13 @@ function withLock(dav, key, timeout, fn) {
             if (e.name === 'lock') {
                 throw e;
             }
-            unlock(dav, key)
+            unlock(dav, key);
         });
 }
 
 async function migrate(dav) {
-    console.log('migrate cloud...')
-    let version = '0'
+    console.log('migrate cloud...');
+    let version = '0';
     try {
         version = await dav.getFileContents('/version', {format: 'text'});
     } catch (e) {
@@ -109,7 +109,7 @@ async function migrate(dav) {
 
     const versions = Object.keys(migrateCloud).sort(compareVersions);
     if (compareVersions(version, versions[versions.length - 1]) >= 0) {
-        console.log('cloud up to date')
+        console.log('cloud up to date');
         return;
     }
 
@@ -125,7 +125,7 @@ async function migrate(dav) {
 }
 
 async function pullFullData(dav, plan, version) {
-    console.log('pull full data...')
+    console.log('pull full data...');
     const path = `${wordsPath(plan.id)}/data.csv`;
     const data = await dav.getFileContents(path, {format: 'text'});
     for (const row of parseCSV(wordFields, data)) {
@@ -377,4 +377,4 @@ async function synchronize(dwords) {
 
 module.exports = {
     initSync, synchronize,
-}
+};

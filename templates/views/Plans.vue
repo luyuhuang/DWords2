@@ -164,7 +164,7 @@ export default {
     html2text,
 
     onKeyUp(e) {
-      if (e.key == 'Escape') {
+      if (e.key === 'Escape') {
         this.adding = false;
         this.editingPlan = {};
         this.editingWord = {};
@@ -206,7 +206,7 @@ export default {
       this.words = words;
 
       const up = 1, down = 2;
-      let pages = [], before = [], after = [];
+      const pages = [], before = [], after = [];
       for (let i = Math.max(1, this.page - up); i <= Math.min(pageNum, this.page + down); i++) {
         pages.push(i);
       }
@@ -250,7 +250,7 @@ export default {
 
       await this.pageTo(Math.ceil(index / this.pageSize));
 
-      const w = this.words.find(w => w.word == word);
+      const w = this.words.find(w => w.word === word);
       if (w) {
         this.editWord(w);
       }
@@ -400,7 +400,7 @@ export default {
       const items = [
         { name: 'Edit', action: () => this.editWord(word) },
         { name: 'Delete', action: () => this.delWord(word) },
-      ]
+      ];
       this.$emit('showContextMenu', {x: e.clientX, y: e.clientY, items});
     },
 
@@ -446,7 +446,7 @@ export default {
       const data = {
         word: this.editingWord.newWord,
         paraphrase: this.editingWord.paraphrase,
-      }
+      };
 
       const err = await ipcRenderer.invoke('updateWord', planID, word, data);
       if (err) {
@@ -484,12 +484,12 @@ export default {
       this.getParaphrase(word, paraphrase => this.inputedParaphrase = paraphrase);
     },
 
-    'editingWord.newWord': function(word) {
+    'editingWord.newWord'(word) {
       if (word === undefined) return;
       this.getParaphrase(word, paraphrase => this.editingWord.paraphrase = paraphrase);
     }
   },
-}
+};
 </script>
 
 <style scoped>

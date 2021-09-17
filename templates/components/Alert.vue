@@ -22,7 +22,7 @@
 </template>
 
 <script>
-import { Modal } from 'bootstrap'
+import { Modal } from 'bootstrap';
 
 export default {
   data() {
@@ -30,11 +30,11 @@ export default {
       title: '',
       content: '',
       buttons: [],
-    }
+    };
   },
 
   mounted() {
-    this.modal = new Modal(this.$refs.modal, {})
+    this.modal = new Modal(this.$refs.modal, {});
     this.$parent.$on('showAlert', this.showAlert);
   },
 
@@ -54,7 +54,7 @@ export default {
       }
     }
   }
-}
+};
 </script>
 
 <style scoped>

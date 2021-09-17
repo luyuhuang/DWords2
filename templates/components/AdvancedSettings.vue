@@ -23,5 +23,5 @@ export default {
       ipcRenderer.send('toggleDevTools');
     },
   },
-}
+};
 </script>

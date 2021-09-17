@@ -1,5 +1,5 @@
 module.exports = {
-    '0.0.1' : async function (dav) {
+    async '0.0.1' (dav) {
         await dav.createDirectory('/words');
     },
 };

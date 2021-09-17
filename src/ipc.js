@@ -5,7 +5,6 @@ const settings = require('./settings');
 const { synchronize } = require("./sync");
 const { dialog, app, BrowserWindow } = require("electron");
 const { readFile, writeFile } = require("fs/promises");
-const path = require('path');
 
 
 function close(event) {
@@ -34,14 +33,16 @@ function moveWin(event, dx, dy) {
 }
 
 async function getPlans() {
-    return await getUserDB().all(`select * from plans where not deleted`);
+    const plans = await getUserDB().all(`select * from plans where not deleted`);
+    return plans;
 }
 
 async function getCurrentPlan() {
-    return await getSys('currentPlan');
+    const plan = await getSys('currentPlan');
+    return plan;
 }
 
-async function getWords(_, planID, limit=-1, offset=0) {
+async function getWords(_, planID, limit = -1, offset = 0) {
     const count = (await getUserDB().get(`select count(*) as c from words
         where plan_id = ? and not deleted`, planID)).c;
     const words = await getUserDB().all(`select * from words
@@ -70,7 +71,7 @@ const importFields = [
 async function importCSV(id, plan) {
     const data = await readFile(plan.path, {encoding: 'utf8'});
     const dictID = await settings.getSetting('dictionary');
-    const { table, field } = DICTIONARIES[dictID]
+    const { table, field } = DICTIONARIES[dictID];
 
     let i = 0;
     for (let {word, paraphrase} of parseCSV(importFields, data)) {
@@ -91,7 +92,7 @@ async function importJSON(id, plan) {
     const content = JSON.parse(data);
     await getUserDB().run(`update plans set name = ? where id = ?`, content.name, id);
 
-    for (let word of content.words) {
+    for (const word of content.words) {
         await getUserDB().run(`insert or ignore into words
             (plan_id, word, time, paraphrase, show_paraphrase, color, status, version)
             values (?, ?, ?, ?, ?, ?, ?, ?)`,
@@ -180,7 +181,7 @@ async function addWord(_, planID, word, time, paraphrase) {
     return true;
 }
 
-async function getWordList(_, tab, limit=-1, offset=0) {
+async function getWordList(_, tab, limit = -1, offset = 0) {
     const planId = await getCurrentPlan();
     const maxCurrent = await settings.getSetting('maxCurrent');
     let sql, args;
@@ -210,8 +211,9 @@ async function getWordList(_, tab, limit=-1, offset=0) {
             break;
     }
 
-    return await getUserDB().all(`with u as (${sql}) select * from u limit ? offset ?`,
+    const wordList = await getUserDB().all(`with u as (${sql}) select * from u limit ? offset ?`,
         ...args, limit, offset);
+    return wordList;
 }
 
 async function updateWord(_, planID, word, data) {
@@ -263,8 +265,9 @@ async function delWord(_, planID, word) {
 
 async function consultDictionary(_, word) {
     const id = await settings.getSetting('dictionary');
-    const dict = DICTIONARIES[id]
-    return await getDictDB().get(`select *, ${dict.field} as paraphrase from ${dict.table} where word = ?`, word);
+    const dict = DICTIONARIES[id];
+    const res = await getDictDB().get(`select *, ${dict.field} as paraphrase from ${dict.table} where word = ?`, word);
+    return res;
 }
 
 async function search(_, word) {
@@ -283,16 +286,17 @@ async function search(_, word) {
 }
 
 async function getSettings(_, ...keys) {
-    return await settings.getSettings(...keys);
+    const st = await settings.getSettings(...keys);
+    return st;
 }
 
 async function updateSettings(_, s) {
-    return await settings.updateSettings(this, s);
+    await settings.updateSettings(this, s);
 }
 
 async function getWordsByPrefix(_, prefix) {
     const id = await settings.getSetting('dictionary');
-    const dict = DICTIONARIES[id]
+    const dict = DICTIONARIES[id];
     const res = await getDictDB().all(`select word from ${dict.table} where word like ? limit 100`, `${prefix}%`);
     return res.map(({word}) => word);
 }
@@ -308,6 +312,7 @@ function sync(e) {
     });
 }
 
+// eslint-disable-next-line require-await
 async function isSyncing() {
     return this.syncing;
 }
@@ -380,4 +385,4 @@ module.exports = {
     getWordList, updateWord, delWord, consultDictionary, search, getSettings,
     updateSettings, getWordsByPrefix, toggleDevTools, sync, isSyncing, importPlan,
     showAbout, exit, exportPlan, resetPlan,
-}
+};

@@ -128,9 +128,9 @@ export default {
     },
     mouseUp(e) {
       if (document.title === 'Danmaku-dragging') {
-        const d = Math.abs(e.screenX - this.beginX) + Math.abs(e.screenY - this.beginY)
+        const d = Math.abs(e.screenX - this.beginX) + Math.abs(e.screenY - this.beginY);
         if (d < 5) {
-          this.clickWord(e)
+          this.clickWord(e);
         }
         document.title = this.activated ? 'Danmaku-activated' : 'Danmaku';
       }
@@ -145,13 +145,13 @@ export default {
       ipcRenderer.invoke('updateWord', this.planID, this.word, {status: this.status});
     },
 
-    pronounce(e) {
+    pronounce() {
       const c = this.word[0].toUpperCase();
       new Audio(`../assets/audio/${c}/${this.word}.mp3`).play();
     },
 
     clickDictionary(e) {
-      const dict = this.dictionaries[e.target.getAttribute('index')]
+      const dict = this.dictionaries[e.target.getAttribute('index')];
       shell.openExternal(dict.url + this.word);
     },
 
@@ -160,7 +160,7 @@ export default {
       ipcRenderer.invoke('updateWord', this.planID, this.word, {show_paraphrase: this.showParaphrase});
     },
 
-    async clickColor() {
+    clickColor() {
       ipcRenderer.invoke('updateWord', this.planID, this.word, {color: this.color});
     },
 
@@ -182,7 +182,7 @@ export default {
       return this.showParaphrase === null ? this.defaultShowParaphrase : this.showParaphrase;
     },
   },
-}
+};
 </script>
 
 <style scoped>

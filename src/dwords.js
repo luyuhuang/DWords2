@@ -26,7 +26,7 @@ function initDWords() {
 
 function setAppEvents() {
     app.on('activate', showWindow);
-    app.on('window-all-closed', () => {})
+    app.on('window-all-closed', () => {});
     app.once('before-quit', async (e) => {
         e.preventDefault();
         await getUserDB().close();
@@ -53,7 +53,7 @@ function createMainWindow() {
 }
 
 function showWindow() {
-    const mainWindow = BrowserWindow.getAllWindows().find(win => win.getTitle() === 'DWords')
+    const mainWindow = BrowserWindow.getAllWindows().find(win => win.getTitle() === 'DWords');
     if (mainWindow) {
         mainWindow.show();
     } else {

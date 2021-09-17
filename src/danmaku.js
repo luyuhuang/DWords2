@@ -33,7 +33,6 @@ async function createDanmaku(word) {
         // roundedCorners: false,
         backgroundColor: '#00ffffff',
         hasShadow: false,
-        alwaysOnTop: true,
         title: 'Danmaku',
         webPreferences: {
             nodeIntegration: true,
@@ -70,7 +69,7 @@ async function launchDanmaku(dwords) {
     const planID = await getCurrentPlan();
     if (!planID) return;
 
-    const maxCurrent = await getSetting('maxCurrent')
+    const maxCurrent = await getSetting('maxCurrent');
     const ph = '?,'.repeat(dwords.currentDanmakus.size).slice(0, -1);
     const word = await getUserDB().get(`with u as (
         select * from words where plan_id = ? and status = 0 and not deleted
@@ -119,4 +118,4 @@ function refreshDanmakus() {
 
 module.exports = {
     initDanmaku,
-}
+};

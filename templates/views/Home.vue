@@ -56,10 +56,10 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
-import Table from '../components/Table.vue'
-import SideBar from '../components/SideBar.vue'
-import Search from '../components/Search.vue'
-import Toast from '../components/Toast.vue'
+import Table from '../components/Table.vue';
+import SideBar from '../components/SideBar.vue';
+import Search from '../components/Search.vue';
+import Toast from '../components/Toast.vue';
 import NewPlan from '../components/NewPlan.vue';
 
 export default {
@@ -118,7 +118,7 @@ export default {
     },
 
     async setWordList() {
-      this.words = await this.appendWordList([])
+      this.words = await this.appendWordList([]);
     },
 
     onChangeTab(tab) {
@@ -132,7 +132,7 @@ export default {
       ipcRenderer.send('close');
     },
 
-    async clickSync() {
+    clickSync() {
       ipcRenderer.send('sync');
     },
 

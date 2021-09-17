@@ -57,7 +57,7 @@ export default {
   data() {
     return {
       colors: ['red', 'coral', 'orange', 'green', 'blue', 'sky', 'dark', 'white'],
-    }
+    };
   },
 
   props: {
@@ -70,7 +70,7 @@ export default {
       this.$emit('change', ...keys);
     },
   },
-}
+};
 </script>
 
 <style scoped>

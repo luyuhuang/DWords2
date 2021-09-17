@@ -24,23 +24,23 @@
 </template>
 
 <script>
-import Title from '../components/Title.vue'
-import GeneralSettings from '../components/GeneralSettings.vue'
-import DanmakuSettings from '../components/DanmakuSettings.vue'
-import SyncSettings from '../components/SyncSettings.vue'
-import AdvancedSettings from '../components/AdvancedSettings.vue'
-import { ScrollSpy } from 'bootstrap'
+import Title from '../components/Title.vue';
+import GeneralSettings from '../components/GeneralSettings.vue';
+import DanmakuSettings from '../components/DanmakuSettings.vue';
+import SyncSettings from '../components/SyncSettings.vue';
+import AdvancedSettings from '../components/AdvancedSettings.vue';
+import { ScrollSpy } from 'bootstrap';
 const { ipcRenderer } = window.require("electron");
 
 export default {
   data() {
     return {
       settings: {}
-    }
+    };
   },
 
   async created() {
-    this.settings = await ipcRenderer.invoke("getSettings")
+    this.settings = await ipcRenderer.invoke("getSettings");
   },
 
   mounted() {
@@ -66,5 +66,5 @@ export default {
       ipcRenderer.invoke("updateSettings", update);
     }
   },
-}
+};
 </script>

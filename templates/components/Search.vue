@@ -49,7 +49,7 @@
 </template>
 
 <script>
-import { Modal } from 'bootstrap'
+import { Modal } from 'bootstrap';
 const { ipcRenderer, shell } = window.require('electron');
 
 export default {
@@ -61,7 +61,7 @@ export default {
       dictionaries: [],
 
       result: {},
-    }
+    };
   },
 
   props: {
@@ -73,7 +73,7 @@ export default {
   },
 
   mounted() {
-    this.modal = new Modal(this.$refs.modal, {})
+    this.modal = new Modal(this.$refs.modal, {});
 
     document.addEventListener('keyup', this.onKeyUp);
     this.$parent.$on('search', this.search);
@@ -122,7 +122,7 @@ export default {
     },
 
     clickDictionary(e) {
-      const dict = this.dictionaries[e.target.getAttribute('index')]
+      const dict = this.dictionaries[e.target.getAttribute('index')];
       shell.openExternal(dict.url + this.result.word);
     },
 
@@ -163,7 +163,7 @@ export default {
       }, 100);
     }
   }
-}
+};
 </script>
 
 <style scoped>

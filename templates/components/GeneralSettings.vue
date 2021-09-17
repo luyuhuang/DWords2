@@ -51,7 +51,7 @@
 </template>
 
 <script>
-import { DICTIONARIES } from '../../src/common'
+import { DICTIONARIES } from '../../src/common';
 
 export default {
   data() {
@@ -85,5 +85,5 @@ export default {
       this.$emit('change', ...keys);
     },
   },
-}
+};
 </script>

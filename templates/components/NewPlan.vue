@@ -86,8 +86,8 @@
 
 <script>
 const { ipcRenderer } = window.require('electron');
-import { Modal } from 'bootstrap'
-import { DICTIONARIES } from '../../src/common'
+import { Modal } from 'bootstrap';
+import { DICTIONARIES } from '../../src/common';
 
 export default {
   data() {
@@ -123,7 +123,7 @@ export default {
   },
 
   mounted() {
-    this.modal = new Modal(this.$refs.modal, {})
+    this.modal = new Modal(this.$refs.modal, {});
     this.$parent.$on('newPlan', () => {
       this.name = '';
       this.tag = undefined;
@@ -154,13 +154,13 @@ export default {
       if (!this.name) invalid.push('invalidName');
       switch (this.currType) {
         case 'library':
-          if (!this.dictionary) invalid.push('invalidDict')
-          if (!this.tag) invalid.push('invalidTag')
+          if (!this.dictionary) invalid.push('invalidDict');
+          if (!this.tag) invalid.push('invalidTag');
           break;
         case 'empty':
           break;
         case 'import_':
-          if (!this.path) invalid.push('invalidPath')
+          if (!this.path) invalid.push('invalidPath');
           break;
       }
 
@@ -188,7 +188,7 @@ export default {
       });
 
       if (err) {
-        this.error = err
+        this.error = err;
       } else {
         this.modal.hide();
         this.$emit('planCreated');
@@ -203,6 +203,8 @@ export default {
       const dict = DICTIONARIES[this.dictionary];
       if (dict) {
         return dict.tags;
+      } else {
+        return {};
       }
     },
   },
@@ -225,5 +227,5 @@ export default {
       this.invalidPath = '';
     }
   }
-}
+};
 </script>

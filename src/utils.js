@@ -7,7 +7,7 @@ function wait(t) {
 }
 
 function getWinByWebContentsID(id) {
-    return BrowserWindow.getAllWindows().find(win => win.webContents.id === id)
+    return BrowserWindow.getAllWindows().find(win => win.webContents.id === id);
 }
 
 function getMainWin() {
@@ -42,7 +42,7 @@ function parseCSVField(csv, i) {
                 ++i;
             }
             ans += csv.substr(j, i - j);
-            while (i + 1 < csv.length && csv[i] === '"' && csv[i+1] === '"') {
+            while (i + 1 < csv.length && csv[i] === '"' && csv[i + 1] === '"') {
                 ans += '"';
                 j = (i += 2);
             }
@@ -57,7 +57,7 @@ function parseCSVField(csv, i) {
         }
         return [ans, i];
     } else {
-        let j = i;
+        const j = i;
         while (i < csv.length && csv[i] !== ',' && !isNewLine(csv, i)) {
             ++i;
         }
@@ -87,8 +87,8 @@ function* parseCSV(fields, csv) {
 }
 
 function compareVersions(v1, v2) {
-    const a1 = v1.split('.')
-    const a2 = v2.split('.')
+    const a1 = v1.split('.');
+    const a2 = v2.split('.');
     const N = Math.max(a1.length, a2.length);
     for (let i = 0; i < N; ++i) {
         const d = Number(a1[i] || 0) - Number(a2[i] || 0);
@@ -117,14 +117,14 @@ function genUUID() {
     const number = v1().replace(/-/g, '');
     let length = number.length;
     const numberMap = {};
-    for (i = 0; i < length; i++) {
+    for (let i = 0; i < length; i++) {
         numberMap[i] = srcAlphabet.indexOf(number[i]);
     }
 
     let divide, newlen, result = '';
     do {
         divide = 0, newlen = 0;
-        for (i = 0; i < length; i++) {
+        for (let i = 0; i < length; i++) {
             divide = divide * fromBase + numberMap[i];
             if (divide >= toBase) {
                 numberMap[newlen++] = parseInt(divide / toBase, 10);
@@ -143,4 +143,4 @@ function genUUID() {
 module.exports = {
     getWinByWebContentsID, getMainWin, getDanmakuWins, toCSV, parseCSV, wait,
     compareVersions, getSys, setSys, genUUID,
-}
+};

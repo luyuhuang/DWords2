@@ -40,7 +40,7 @@ export default {
   data() {
     return {
       tabs: ['Current', 'Planning', 'Memorized', 'All'],
-    }
+    };
   },
 
   props: {
@@ -65,5 +65,5 @@ export default {
     },
   },
 
-}
+};
 </script>

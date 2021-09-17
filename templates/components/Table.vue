@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import ContextMenu from '../components/ContextMenu.vue'
+import ContextMenu from '../components/ContextMenu.vue';
 import { html2text } from '../scripts/utils';
 const { ipcRenderer, shell } = window.require("electron");
 
@@ -129,7 +129,7 @@ export default {
       };
     }
   }
-}
+};
 </script>
 
 <style scoped>

@@ -4,7 +4,7 @@ const { DEFAULT_SETTINGS } = require("./common");
 const { getUserDB } = require("./database");
 
 function initSettings(dwords) {
-    dwords.watchers = {}
+    dwords.watchers = {};
 
     watchSettings(dwords, 'autoRun', (autoRun) => {
         const autoLaunch = new AutoLaunch({
@@ -22,12 +22,12 @@ function initSettings(dwords) {
 }
 
 async function getSettings(...keys) {
-    let res, settings
+    let res, settings;
     if (keys.length > 0) {
         const ph = '?,'.repeat(keys.length).slice(0, -1);
         res = await getUserDB().all(`select * from settings where key in (${ph})`, keys);
         settings = {};
-        for (key of keys) {
+        for (const key of keys) {
             settings[key] = DEFAULT_SETTINGS[key];
         }
     } else {

@@ -7,6 +7,7 @@
   "license": "MIT",
   "main": "src/main.js",
   "scripts": {
+    "lint": "eslint . --ext js,vue",
     "start": "yarn build && electron .",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -31,6 +32,9 @@
     "bootstrap-icons": "^1.5.0",
     "electron": "^13.1.6",
     "electron-builder": "^22.11.7",
+    "eslint": "^7.32.0",
+    "eslint-plugin-import": "^2.24.2",
+    "eslint-plugin-vue": "^7.17.0",
     "vue": "^2.6.14",
     "vue-router": "^3.5.2",
     "vue-template-compiler": "^2.6.14"
