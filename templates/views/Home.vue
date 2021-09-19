@@ -1,5 +1,5 @@
 <template>
-  <div id="widget" class="d-flex flex-row" style="width: 100vw; height: 100vh" v-if="inited">
+  <div id="widget" class="flex flex-row" style="width: 100vw; height: 100vh" v-show="inited">
     <SideBar :currentTab="currentTab" @onChangeTab="onChangeTab"></SideBar>
 
     <div class="col-9 d-flex flex-column">
@@ -39,8 +39,9 @@
       </Table>
 
       <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
-        <button type="button" class="btn btn-primary me-2" :disabled="syncing" @click="clickSync">
+        <button ref="sync" type="button" class="btn btn-primary me-2" :disabled="syncing" @click="clickSync">
           <span class="spinner-border spinner-border-sm" v-if="syncing"></span>
+          <i class="bi bi-exclamation-circle" v-else-if="syncErr"></i>
           {{ syncing ? 'Syncing...' : 'Sync' }}
         </button>
         <button type="button" class="btn me-2" :class="quiz ? 'btn-secondary' : 'btn-primary'" @click="clickQuiz">
@@ -56,6 +57,7 @@
 
 <script>
 const { ipcRenderer } = window.require("electron");
+import { Tooltip } from 'bootstrap';
 import Table from '../components/Table.vue';
 import SideBar from '../components/SideBar.vue';
 import Search from '../components/Search.vue';
@@ -71,6 +73,7 @@ export default {
       appending: false,
       quiz: false,
       syncing: false,
+      syncErr: undefined,
       currentPlan: null,
       inited: false,
     };
@@ -80,18 +83,29 @@ export default {
 
   created() {
     ipcRenderer.on('refreshList', () => this.setWordList());
-    ipcRenderer.on('syncStatus', (_, syncing) => this.syncing = syncing);
-    ipcRenderer.on('syncError', (_, err) => {
-      this.$emit('showToast', {content: err, delay: 3000});
+    ipcRenderer.on('syncStatus', (_, syncing, err) => {
+      this.syncing = syncing;
+      this.syncErr = err;
+      if (err) {
+        this.$emit('showToast', {content: err, delay: 3000});
+      }
     });
 
     this.init();
   },
 
+  mounted() {
+    this.tooltip = new Tooltip(this.$refs.sync, {title: () => this.syncErr});
+  },
+
+  destroyed() {
+    this.tooltip.dispose();
+  },
+
   methods: {
     async init() {
       await this.fetchCurrPlan();
-      await this.fetchSyncing();
+      await this.fetchSyncStatus();
       await this.setWordList();
       this.inited = true;
     },
@@ -100,8 +114,8 @@ export default {
       this.currentPlan = await ipcRenderer.invoke('getCurrentPlan');
     },
 
-    async fetchSyncing() {
-      this.syncing = await ipcRenderer.invoke('isSyncing');
+    async fetchSyncStatus() {
+      [this.syncing, this.syncErr] = await ipcRenderer.invoke('syncStatus');
     },
 
     async appendWordList(words) {
@@ -134,6 +148,7 @@ export default {
 
     clickSync() {
       ipcRenderer.send('sync');
+      this.tooltip.hide();
     },
 
     clickQuiz() {
@@ -158,3 +173,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.flex {
+  display: flex;
+}
+</style>

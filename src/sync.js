@@ -32,31 +32,27 @@ const planFields = [
 
 function initSync(dwords) {
     dwords.syncing = false;
+    dwords.syncErr = undefined;
     dwords.migrated = false;
 
     autoSync(dwords);
 }
 
 async function autoSync(dwords) {
-    try {
-        await synchronize(dwords);
-    } catch (e) {
-        console.error('sync err', e);
-    }
+    const {syncURL, username, password} = await getSettings('syncURL', 'username', 'password');
+    if (!syncURL || !username || !password) return;
+    await synchronize(dwords);
 
     const interval = await getSetting('syncInterval') * 1000;
     setTimeout(() => autoSync(dwords), interval);
 }
 
-function isSyncing(dwords) {
-    return dwords.syncing;
-}
-
-function setSyncing(dwords, syncing) {
+function setSyncStatus(dwords, syncing, err = undefined) {
     dwords.syncing = syncing;
+    dwords.syncErr = err;
     const win = getMainWin();
     if (win) {
-        win.webContents.send('syncStatus', syncing);
+        win.webContents.send('syncStatus', syncing, err);
     }
 }
 
@@ -83,11 +79,11 @@ function withLock(dav, key, timeout, fn) {
     return lock(dav, key, timeout)
         .then(fn)
         .then(() => unlock(dav, key))
-        .catch(e => {
+        .catch(async e => {
             if (e.name === 'lock') {
                 throw e;
             }
-            unlock(dav, key);
+            await unlock(dav, key);
         });
 }
 
@@ -342,11 +338,10 @@ async function syncPlans(dav) {
 }
 
 async function synchronize(dwords) {
-    if (isSyncing(dwords)) {
-        return;
-    }
-    setSyncing(dwords, true);
+    if (dwords.syncing) return;
+    setSyncStatus(dwords, true);
 
+    let err;
     try {
         console.log('synchronizing...');
 
@@ -370,9 +365,13 @@ async function synchronize(dwords) {
         await setSys('syncVersion', Date.now()); // TODO: deal with modifications during sync
 
         console.log(`synchronize done`);
-    } finally {
-        setSyncing(dwords, false);
+    } catch (e) {
+        err = e;
+        console.log('sync err', e);
     }
+
+    setSyncStatus(dwords, false, err);
+    return err;
 }
 
 module.exports = {

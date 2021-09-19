@@ -4,7 +4,10 @@ Show words as Danmaku on the screen to help you memorize them.
 
 把单词变成屏幕上的弹幕来帮助你记住它们.
 
-![screenshot](screenshot.jpg)
+[![build](https://img.shields.io/github/workflow/status/luyuhuang/DWords2/Build)](https://github.com/luyuhuang/DWords2/actions)
+[![release](https://img.shields.io/github/release/luyuhuang/DWords2.svg)](https://github.com/luyuhuang/DWords2/releases)
+
+![screenshot](screenshots/screenshot.jpg)
 
 **Download from the [release page](release) | 到[发布页][release]下载**
 
@@ -29,3 +32,22 @@ Main Features:
 - [x] Support word search | 支持查词
 - [ ] Statistics | 学习统计
 - [ ] Review according to the forgetting curve | 根据艾宾浩斯遗忘曲线复习
+
+## Synchronization
+
+DWords supports synchronization. We can synchronize words and learning states between devices via any cloud service that supports WebDAV.
+
+DWords 支持同步. 我们可以通过任何支持 WebDAV 的云服务在不同设备之间同步单词和学习记录.
+
+If your cloud drive supports WebDAV, a WebDAV URL usually could be found on its settings page.
+
+如果你的云盘支持WebDAV, 通常可以在其设置页面上找到WebDAV URL.
+
+<img src="screenshots/webdav-url-1.png" width="270">
+<img src="screenshots/webdav-url-2.png" width="270">
+
+That URL usually represents the root directory of your cloud drive. You can create a folder named `DWords`, then open DWords' settings interface and set the WebDAV URL as the root URL plus the folder name. Don't forget to enter the corresponding username and password.
+
+这个 URL 通常代表云盘的根目录. 你可以创建一个名为 `DWords` 的文件夹, 然后打开 DWords 的设置界面, 将 WebDAV URL 设置成根 URL + 文件夹名. 别忘了输入相应的用户名和密码.
+
+<img src="screenshots/synchronization.png" width="600">
