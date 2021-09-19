@@ -19,16 +19,21 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         set -x
-        getver() {
-          node -e "process.stdin.on('data', d => {console.log(JSON.parse(d.toString()).version)})"
-        }
-        last=$(git show 'HEAD^:package.json' | getver)
-        curr=$(cat package.json | getver)
-        tag="v$curr"
-        if [ "$last" != "$curr" ] && ! git show-ref --tags "$tag" --quiet; then
-          as="$(printf '{if($1=="##"&&$2=="%s"){F=1;print$2}else if($1!="##"&&F){print$0}else if(F){exit}}' $tag)"
-          msg="$(cat CHANGELOG.md | awk "$as")"
-          git tag $tag
-          git push --tags
-          hub release create -m "$msg" "$tag"
-        fi
+        pwd
+        ls
+        git --version
+        git status
+
+        # getver() {
+        #   node -e "process.stdin.on('data', d => {console.log(JSON.parse(d.toString()).version)})"
+        # }
+        # last=$(git show 'HEAD^:package.json' | getver)
+        # curr=$(cat package.json | getver)
+        # tag="v$curr"
+        # if [ "$last" != "$curr" ] && ! git show-ref --tags "$tag" --quiet; then
+        #   as="$(printf '{if($1=="##"&&$2=="%s"){F=1;print$2}else if($1!="##"&&F){print$0}else if(F){exit}}' $tag)"
+        #   msg="$(cat CHANGELOG.md | awk "$as")"
+        #   git tag $tag
+        #   git push --tags
+        #   hub release create -m "$msg" "$tag"
+        # fi
