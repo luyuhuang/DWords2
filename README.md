@@ -4,12 +4,11 @@ Show words as Danmaku on the screen to help you memorize them.
 
 把单词变成屏幕上的弹幕来帮助你记住它们.
 
-[![build](https://img.shields.io/github/workflow/status/luyuhuang/DWords2/Build)](https://github.com/luyuhuang/DWords2/actions)
 [![release](https://img.shields.io/github/release/luyuhuang/DWords2.svg)](https://github.com/luyuhuang/DWords2/releases)
 
 ![screenshot](screenshots/screenshot.jpg)
 
-**Download from the [release page](release) | 到[发布页][release]下载**
+**Download from the [release page][release] | 到[发布页][release]下载**
 
 [release]: https://github.com/luyuhuang/DWords2/releases
 
@@ -41,10 +40,9 @@ DWords 支持同步. 我们可以通过任何支持 WebDAV 的云服务在不同
 
 If your cloud drive supports WebDAV, a WebDAV URL usually could be found on its settings page.
 
-如果你的云盘支持WebDAV, 通常可以在其设置页面上找到WebDAV URL.
+如果你的云盘支持 WebDAV, 通常可以在其设置页面上找到 WebDAV URL.
 
-<img src="screenshots/webdav-url-1.png" width="270">
-<img src="screenshots/webdav-url-2.png" width="270">
+<img src="screenshots/webdav-url-1.png" width="320">
 
 That URL usually represents the root directory of your cloud drive. You can create a folder named `DWords`, then open DWords' settings interface and set the WebDAV URL as the root URL plus the folder name. Don't forget to enter the corresponding username and password.
 

@@ -6,8 +6,28 @@ on:
     - 'v*'
 
 jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Install Node
+      uses: actions/setup-node@v1
+      with:
+        node-version: 14.x
+    - name: Release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        set -x
+        tag_name="${GITHUB_REF##*/}"
+        as="$(printf '{if($1=="##"&&$2=="%s"){F=1;print$2}else if($1!="##"&&F){print$0}else if(F){exit}}' $tag_name)"
+        msg="$(cat CHANGELOG.md | awk "$as")"
+        hub release create -m "$msg" "$tag_name"
+
   macos:
     name: Release macOS
+    needs: release
     runs-on: macos-latest
     steps:
     - name: Checkout
@@ -28,6 +48,7 @@ jobs:
 
   windows:
     name: Release Windows
+    needs: release
     runs-on: windows-latest
     steps:
     - name: Checkout
