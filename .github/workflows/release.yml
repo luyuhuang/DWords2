@@ -65,4 +65,4 @@ jobs:
       run: |
         $version=$(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json')).version)")
         $tag_name=$Env:GITHUB_REF.split("/")[-1]
-        hub release edit -a "dist\DWords Setup $version.exe" -m "" "$tag_name"
+        hub release edit -a "dist\DWords Setup $version.exe" -m " " "$tag_name"
