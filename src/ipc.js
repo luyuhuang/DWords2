@@ -272,7 +272,8 @@ async function consultDictionary(_, word) {
 
 async function search(_, word) {
     const planID = await getCurrentPlan();
-    const res = await getUserDB().get(`select * from words where word = ? and plan_id = ?`, word, planID);
+    const res = await getUserDB().get(`select * from words
+        where word = ? and plan_id = ? and not deleted`, word, planID);
     let d = await consultDictionary(undefined, word);
     if (res) {
         if (!d) {

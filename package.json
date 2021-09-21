@@ -22,8 +22,9 @@
       "category": "public.app-category.education"
     },
     "files": [
-      "!/templates",
-      "!/screenshots"
+      "!templates",
+      "!screenshots",
+      "!vue.config.js"
     ]
   },
   "devDependencies": {
