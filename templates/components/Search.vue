@@ -180,18 +180,22 @@ export default {
 }
 
 .search-box {
-  height: 1em;
+  height: .9em;
   width: 17em;
-  border: none;
-  border-width: 0px;
+  border: 1px solid;
+  border-color: rgba(0, 0, 0, 0);
   background: #eff0f1;
   border-radius: 1em;
   padding: 1em;
   padding-left: 2.2em;
+  transition: .15s ease-in-out;
 }
 
 .search-box:focus {
-  outline: none;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 .25rem rgba(13,110,253,.25);
 }
 
 .preview-list {

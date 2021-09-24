@@ -371,6 +371,10 @@ async function synchronize(dwords) {
     }
 
     setSyncStatus(dwords, false, err);
+    const win = getMainWin();
+    if (win) {
+        win.webContents.send('refreshList');
+    }
     return err;
 }
 
