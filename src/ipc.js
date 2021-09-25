@@ -1,10 +1,11 @@
-const { DICTIONARIES } = require("./common");
+const { DICTIONARIES, LOG_DIR, DATA_DIR } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
 const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV } = require("./utils");
 const settings = require('./settings');
 const { synchronize } = require("./sync");
-const { dialog, app, BrowserWindow } = require("electron");
-const { readFile, writeFile } = require("fs/promises");
+const { dialog, app, BrowserWindow, shell } = require("electron");
+const { readFile, writeFile, readdir } = require("fs/promises");
+const path = require('path');
 
 
 function close(event) {
@@ -377,10 +378,29 @@ async function resetPlan(_, id) {
         where plan_id = ?`, Date.now(), id);
 }
 
+async function openLog() {
+    const suffix = `-${process.pid}.log`;
+    const files = await readdir(LOG_DIR);
+    const time = files.filter(f => f.endsWith(suffix))
+        .map(f => f.slice(0, -suffix.length)).map(Number)
+        .reduce((a, b) => Math.max(a, b), -1);
+
+    if (time < 0) {
+        dialog.showMessageBox(getMainWin(), {message: 'No log file found.', type: 'error'});
+        return;
+    }
+
+    shell.openPath(path.join(LOG_DIR, time + suffix));
+}
+
+function openDataDir() {
+    shell.openPath(DATA_DIR);
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, getWordIndex, selectPlan, newPlan, renamePlan, delPlan, addWord,
     getWordList, updateWord, delWord, consultDictionary, search, getSettings,
     updateSettings, getWordsByPrefix, toggleDevTools, sync, syncStatus, importPlan,
-    showAbout, exit, exportPlan, resetPlan,
+    showAbout, exit, exportPlan, resetPlan, openLog, openDataDir,
 };

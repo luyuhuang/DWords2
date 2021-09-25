@@ -5,6 +5,7 @@ module.exports = {
   },
   globals: {
     "__dirname": "readonly",
+    "process": "readonly",
   },
   extends: [
     'plugin:vue/essential',

@@ -57,3 +57,4 @@ exports.DICTIONARIES = {
 };
 
 exports.DATA_DIR = path.join(os.homedir(), '.DWords2');
+exports.LOG_DIR = path.join(exports.DATA_DIR, 'logs');
