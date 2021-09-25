@@ -56,18 +56,36 @@ function setSyncStatus(dwords, syncing, err = undefined) {
     }
 }
 
+function tryForceUnlock(dav, path) {
+    console.log('try force unlocking %s', path);
+    return withLock(dav, path.substr(2), 10000, async () => {
+        const now = Date.now();
+        const time = Number(await dav.getFileContents(path, {format: 'text'}));
+        if (now - time > 10 * 60 * 1000) {
+            await dav.putFileContents(path, now.toString(), {overwrite: true});
+            console.log('force unlock %s succeed', path);
+            return true;
+        } else {
+            console.log('force unlock %s failed', path);
+            return false;
+        }
+    });
+}
+
 async function lock(dav, key, timeout = Infinity) {
     const path = lockPath(key);
     const option = {overwrite: false};
     const now = Date.now();
-    while (timeout > 0 && !(await dav.putFileContents(path, '.', option))) {
+    while (timeout > 0 && !(await dav.putFileContents(path, now.toString(), option))) {
         await wait(1000);
         timeout -= Date.now() - now;
     }
     if (timeout <= 0) {
-        const e = Error(`Timeout when locking ${key}, try again latter.`);
-        e.name = 'lock';
-        throw e;
+        if (!await tryForceUnlock(dav, path)) {
+            const e = Error(`Timeout when locking ${key}, try again latter.`);
+            e.name = 'lock';
+            throw e;
+        }
     }
 }
 
@@ -78,12 +96,12 @@ async function unlock(dav, key) {
 function withLock(dav, key, timeout, fn) {
     return lock(dav, key, timeout)
         .then(fn)
-        .then(() => unlock(dav, key))
+        .then(r => (unlock(dav, key), r))
         .catch(async e => {
-            if (e.name === 'lock') {
-                throw e;
+            if (e.name !== 'lock') {
+                await unlock(dav, key);
             }
-            await unlock(dav, key);
+            throw e;
         });
 }
 
