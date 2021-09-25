@@ -1,11 +1,11 @@
-const { DICTIONARIES, LOG_DIR, DATA_DIR } = require("./common");
+const { DICTIONARIES, DATA_DIR } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
 const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV } = require("./utils");
 const settings = require('./settings');
 const { synchronize } = require("./sync");
 const { dialog, app, BrowserWindow, shell } = require("electron");
-const { readFile, writeFile, readdir } = require("fs/promises");
-const path = require('path');
+const { readFile, writeFile } = require("fs/promises");
+const { currentLog } = require("./log");
 
 
 function close(event) {
@@ -379,18 +379,13 @@ async function resetPlan(_, id) {
 }
 
 async function openLog() {
-    const suffix = `-${process.pid}.log`;
-    const files = await readdir(LOG_DIR);
-    const time = files.filter(f => f.endsWith(suffix))
-        .map(f => f.slice(0, -suffix.length)).map(Number)
-        .reduce((a, b) => Math.max(a, b), -1);
-
-    if (time < 0) {
+    const path = await currentLog();
+    if (!path) {
         dialog.showMessageBox(getMainWin(), {message: 'No log file found.', type: 'error'});
         return;
     }
 
-    shell.openPath(path.join(LOG_DIR, time + suffix));
+    shell.openPath(path);
 }
 
 function openDataDir() {
