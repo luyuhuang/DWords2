@@ -33,7 +33,7 @@ export default {
     },
 
     openLog() {
-      ipcRenderer.invoke('openLog');
+      ipcRenderer.send('openLog');
     },
     openDataDir() {
       ipcRenderer.send('openDataDir');

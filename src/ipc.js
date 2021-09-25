@@ -5,7 +5,7 @@ const settings = require('./settings');
 const { synchronize } = require("./sync");
 const { dialog, app, BrowserWindow, shell } = require("electron");
 const { readFile, writeFile } = require("fs/promises");
-const { currentLog } = require("./log");
+const { currentLogPath } = require("./log");
 
 
 function close(event) {
@@ -378,14 +378,8 @@ async function resetPlan(_, id) {
         where plan_id = ?`, Date.now(), id);
 }
 
-async function openLog() {
-    const path = await currentLog();
-    if (!path) {
-        dialog.showMessageBox(getMainWin(), {message: 'No log file found.', type: 'error'});
-        return;
-    }
-
-    shell.openPath(path);
+function openLog() {
+    shell.openPath(currentLogPath());
 }
 
 function openDataDir() {
