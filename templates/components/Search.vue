@@ -200,6 +200,7 @@ export default {
 
 .preview-list {
   position: absolute;
+  z-index: 10;
   top: 55px;
   width: 16rem;
   max-height: 90%;
