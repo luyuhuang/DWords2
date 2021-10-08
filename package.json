@@ -28,9 +28,9 @@
     ]
   },
   "devDependencies": {
+    "@popperjs/core": "^2.9.2",
     "@vue/cli-plugin-router": "^4.5.13",
     "@vue/cli-service": "^4.5.13",
-    "@popperjs/core": "^2.9.2",
     "bootstrap": "^5.0.2",
     "bootstrap-icons": "^1.5.0",
     "electron": "^13.1.6",
@@ -44,6 +44,7 @@
   },
   "dependencies": {
     "auto-launch": "^5.0.5",
+    "got": "^9.6.0",
     "sqlite": "^4.0.23",
     "sqlite3": "^5.0.2",
     "uuid": "^8.3.2",

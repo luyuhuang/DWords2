@@ -4,13 +4,13 @@ Show words as Danmaku on the screen to help you memorize them.
 
 把单词变成屏幕上的弹幕来帮助你记住它们.
 
-[![release](https://img.shields.io/github/release/luyuhuang/DWords2.svg)](https://github.com/luyuhuang/DWords2/releases)
+[![release](https://img.shields.io/github/release/luyuhuang/DWords2.svg)][release]
 
 ![screenshot](screenshots/screenshot.jpg)
 
 **Download from the [release page][release] | 到[发布页][release]下载**
 
-[release]: https://github.com/luyuhuang/DWords2/releases
+[release]: https://github.com/luyuhuang/DWords2/releases/latest
 
 ## Introduction
 

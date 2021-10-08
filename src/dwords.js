@@ -6,6 +6,7 @@ const { initSync } = require('./sync');
 const { getMainWin } = require('./utils');
 const path = require('path');
 const { getUserDB, getDictDB } = require('./database');
+const { checkUpdate } = require('./update');
 
 function initDWords() {
     const dwords = {};
@@ -18,6 +19,7 @@ function initDWords() {
     setMenu();
     setTray(dwords);
     initDanmaku(dwords);
+    checkUpdate(true);
 
     watchSettings(dwords, 'maxCurrent', () => getMainWin().webContents.send('refreshList'));
 

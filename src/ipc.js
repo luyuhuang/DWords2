@@ -6,6 +6,7 @@ const { synchronize } = require("./sync");
 const { dialog, app, BrowserWindow, shell } = require("electron");
 const { readFile, writeFile } = require("fs/promises");
 const { currentLogPath } = require("./log");
+const update = require('./update');
 
 
 function close(event) {
@@ -386,10 +387,14 @@ function openDataDir() {
     shell.openPath(DATA_DIR);
 }
 
+function checkUpdate() {
+    update.checkUpdate(false);
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, getWordIndex, selectPlan, newPlan, renamePlan, delPlan, addWord,
     getWordList, updateWord, delWord, consultDictionary, search, getSettings,
     updateSettings, getWordsByPrefix, toggleDevTools, sync, syncStatus, importPlan,
-    showAbout, exit, exportPlan, resetPlan, openLog, openDataDir,
+    showAbout, exit, exportPlan, resetPlan, openLog, openDataDir, checkUpdate,
 };
