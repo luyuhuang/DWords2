@@ -105,7 +105,11 @@ async function getSys(key) {
 }
 
 async function setSys(key, value) {
-    await getUserDB().run(`insert or replace into sys values (?, ?)`, key, JSON.stringify(value));
+    if (value !== undefined) {
+        await getUserDB().run(`insert or replace into sys values (?, ?)`, key, JSON.stringify(value));
+    } else {
+        await getUserDB().run(`delete from sys where key = ?`, key);
+    }
 }
 
 function genUUID() {
