@@ -34,8 +34,10 @@ async function checkUpdate(slience) {
             await setSys('ignoredVersion', undefined);
         }
     } else if (!slience) {
-        dialog.showMessageBox({
-            message: `Up to date\n${app.getVersion()}`,
+        dialog.showMessageBox(getMainWin(), {
+            type: 'info',
+            message: `Up to date`,
+            detail: `Current version: ${app.getVersion()}`,
         });
     }
 }
