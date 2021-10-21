@@ -74,6 +74,7 @@ export default {
       quiz: false,
       syncing: false,
       syncErr: undefined,
+      syncTime: 0,
       currentPlan: null,
       inited: false,
     };
@@ -83,9 +84,10 @@ export default {
 
   created() {
     ipcRenderer.on('refreshList', () => this.setWordList());
-    ipcRenderer.on('syncStatus', (_, syncing, err) => {
+    ipcRenderer.on('syncStatus', (_, syncing, err, time) => {
       this.syncing = syncing;
       this.syncErr = err;
+      this.syncTime = time;
       if (err) {
         this.$emit('showToast', {content: err, delay: 3000});
       }
@@ -95,7 +97,21 @@ export default {
   },
 
   mounted() {
-    this.tooltip = new Tooltip(this.$refs.sync, {title: () => this.syncErr});
+    this.tooltip = new Tooltip(this.$refs.sync, {title: () => {
+      if (this.syncErr) {
+        return this.syncErr;
+      } else if (this.syncTime) {
+        const diff = Date.now() - this.syncTime;
+        if (diff < 3600 * 1000) {
+          const min = Math.floor(diff / 1000 / 60);
+          return `Last sync: ${min} ${min > 1 ? 'minutes' : 'minute'} ago`;
+        } else {
+          return `Last sync: ${new Date(this.syncTime).toLocaleString()}`;
+        }
+      } else {
+        return '';
+      }
+    }});
   },
 
   destroyed() {
@@ -115,7 +131,7 @@ export default {
     },
 
     async fetchSyncStatus() {
-      [this.syncing, this.syncErr] = await ipcRenderer.invoke('syncStatus');
+      [this.syncing, this.syncErr, this.syncTime] = await ipcRenderer.invoke('syncStatus');
     },
 
     async appendWordList(words) {

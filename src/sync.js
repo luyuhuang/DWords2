@@ -34,6 +34,7 @@ const planFields = [
 function initSync(dwords) {
     dwords.syncing = false;
     dwords.syncErr = undefined;
+    dwords.syncTime = 0;
     dwords.migrated = false;
 
     autoSync(dwords);
@@ -51,9 +52,10 @@ async function autoSync(dwords) {
 function setSyncStatus(dwords, syncing, err = undefined) {
     dwords.syncing = syncing;
     dwords.syncErr = err;
+    if (!err) dwords.syncTime = Date.now();
     const win = getMainWin();
     if (win) {
-        win.webContents.send('syncStatus', syncing, err);
+        win.webContents.send('syncStatus', syncing, err, dwords.syncTime);
     }
 }
 

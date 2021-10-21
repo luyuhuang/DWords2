@@ -314,7 +314,7 @@ function sync() {
 
 // eslint-disable-next-line require-await
 async function syncStatus() {
-    return [this.syncing, this.syncErr];
+    return [this.syncing, this.syncErr, this.syncTime];
 }
 
 async function importPlan() {
