@@ -4,12 +4,12 @@ const { getCurrentPlan, consultDictionary } = require("./ipc");
 const { watchSettings, getSetting } = require("./settings");
 const { getDanmakuWins } = require("./utils");
 
-function initDanmaku(dwords) {
+function initDanmaku(dwords, isStop = false) {
     dwords.currentDanmakus = new Set();
-    dwords.danmakuLauncher = undefined;
+    // dwords.danmakuLauncher = undefined;
 
-    setDanmakuLauncher(dwords);
-    watchSettings(dwords, 'danmakuFrequency', () => setDanmakuLauncher(dwords));
+    setDanmakuLauncher(dwords, isStop);
+    watchSettings(dwords, 'danmakuFrequency', () => setDanmakuLauncher(dwords, isStop));
 
     setDanmakuMover(dwords);
     watchSettings(dwords, 'danmakuSpeed', () => setDanmakuMover(dwords));
@@ -56,11 +56,11 @@ async function createDanmaku(word) {
 }
 
 
-async function setDanmakuLauncher(dwords) {
-    if (dwords.danmakuLauncher) {
+async function setDanmakuLauncher(dwords, isStop) {
+    if (dwords.danmakuLauncher || isStop) {
         clearInterval(dwords.danmakuLauncher);
     }
-
+    if (isStop) return;
     const frequency = await getSetting('danmakuFrequency');
     dwords.danmakuLauncher = setInterval(() => launchDanmaku(dwords), frequency * 1000);
     launchDanmaku(dwords);

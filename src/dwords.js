@@ -98,10 +98,18 @@ function setTray(dwords) {
             click() {
                 app.quit();
             }
+        },
+        {
+            label: 'Run/Stop Danmaku',
+            click() {
+                dwords.stop = !dwords.stop;
+                initDanmaku(dwords, dwords.stop);
+            }
         }
     ]));
     tray.on('click', showWindow);
     dwords.tray = tray;
+    dwords.stop = false;
 }
 
 function setIPC(dwords) {
