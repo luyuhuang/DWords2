@@ -6,7 +6,7 @@ const { getDanmakuWins } = require("./utils");
 
 function initDanmaku(dwords) {
     dwords.currentDanmakus = new Set();
-
+    dwords.isDanmakuPaused = false;
     setDanmakuLauncher(dwords);
     watchSettings(dwords, 'danmakuFrequency', () => setDanmakuLauncher(dwords));
 
@@ -118,4 +118,5 @@ function refreshDanmakus() {
 
 module.exports = {
     initDanmaku,
+    setDanmakuLauncher
 };

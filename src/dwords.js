@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, shell } = require('electron');
-const { initDanmaku } = require('./danmaku');
+const { initDanmaku, setDanmakuLauncher } = require('./danmaku');
 const ipc = require('./ipc');
 const { initSettings, watchSettings } = require('./settings');
 const { initSync } = require('./sync');
@@ -103,6 +103,7 @@ function setTray(dwords) {
             label: 'Run/Pause Danmaku',
             click() {
                 dwords.isDanmakuPaused = !dwords.isDanmakuPaused;
+                setDanmakuLauncher(dwords);
             }
         }
     ]));
