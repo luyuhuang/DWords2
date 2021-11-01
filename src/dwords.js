@@ -109,7 +109,6 @@ function setTray(dwords) {
     ]));
     tray.on('click', showWindow);
     dwords.tray = tray;
-    dwords.isDanmakuPaused = false;
 }
 
 function setIPC(dwords) {

@@ -56,16 +56,16 @@ async function createDanmaku(word) {
 
 
 async function setDanmakuLauncher(dwords) {
-    if (dwords.danmakuLauncher || dwords.isDanmakuPaused) {
+    if (dwords.danmakuLauncher) {
         clearInterval(dwords.danmakuLauncher);
     }
-    if (dwords.isDanmakuPaused) return;
     const frequency = await getSetting('danmakuFrequency');
     dwords.danmakuLauncher = setInterval(() => launchDanmaku(dwords), frequency * 1000);
     launchDanmaku(dwords);
 }
 
 async function launchDanmaku(dwords) {
+    if (dwords.isDanmakuPaused) return;
     const planID = await getCurrentPlan();
     if (!planID) return;
 
