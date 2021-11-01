@@ -100,16 +100,15 @@ function setTray(dwords) {
             }
         },
         {
-            label: 'Run/Stop Danmaku',
+            label: 'Run/Pause Danmaku',
             click() {
-                dwords.stop = !dwords.stop;
-                initDanmaku(dwords, dwords.stop);
+                dwords.isDanmakuPaused = !dwords.isDanmakuPaused;
             }
         }
     ]));
     tray.on('click', showWindow);
     dwords.tray = tray;
-    dwords.stop = false;
+    dwords.isDanmakuPaused = false;
 }
 
 function setIPC(dwords) {
