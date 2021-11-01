@@ -104,7 +104,7 @@ export default {
     async fetchSettings() {
       const settings = await ipcRenderer.invoke('getSettings',
         'externalDictionaries', 'danmakuTransparency', 'maxPharaphraseLen',
-        'danmakuColor', 'disableDanmaku', 'disableClick', 'defaultShowParaphrase', 
+        'danmakuColor', 'disableDanmaku', 'disableClick', 'defaultShowParaphrase',
         'danmakuSize');
 
       this.dictionaries = settings.externalDictionaries;
