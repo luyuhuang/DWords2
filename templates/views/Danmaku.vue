@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column danmaku" id="widget" ref="widget" v-if="isVisible">
+  <div class="d-flex flex-column danmaku" id="widget" ref="widget">
     <div class="align-self-start word"
       :style="wordStyle"
       :class="color || defaultColor"
@@ -73,7 +73,6 @@ export default {
       defaultColor: '',
       opacity: 0.5,
       wordSize: '15px',
-      disableDanmaku: false,
       disableClick: false,
       defaultShowParaphrase: false,
     };
@@ -104,14 +103,13 @@ export default {
     async fetchSettings() {
       const settings = await ipcRenderer.invoke('getSettings',
         'externalDictionaries', 'danmakuTransparency', 'maxPharaphraseLen',
-        'danmakuColor', 'disableDanmaku', 'disableClick', 'defaultShowParaphrase',
+        'danmakuColor', 'disableClick', 'defaultShowParaphrase',
         'danmakuSize');
 
       this.dictionaries = settings.externalDictionaries;
       this.opacity = settings.danmakuTransparency / 100;
       this.maxPharaphraseLen = settings.maxPharaphraseLen;
       this.defaultColor = settings.danmakuColor;
-      this.disableDanmaku = settings.disableDanmaku;
       this.disableClick = settings.disableClick;
       this.defaultShowParaphrase = settings.defaultShowParaphrase;
       this.wordSize = settings.danmakuSize + 'px';
@@ -187,10 +185,6 @@ export default {
     isParaphrase() {
       return this.showParaphrase === null ? this.defaultShowParaphrase : this.showParaphrase;
     },
-
-    isVisible() {
-      return !this.disableDanmaku;
-    }
   },
 };
 </script>

@@ -17,7 +17,6 @@ exports.DEFAULT_SETTINGS = {
     danmakuTransparency: 60,
     danmakuSize: 18,
     disableClick: false,
-    disableDanmaku: false,
     defaultShowParaphrase: false,
     maxPharaphraseLen: 16,
     danmakuColor: 'dark',
