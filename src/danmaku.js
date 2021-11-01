@@ -21,6 +21,7 @@ function initDanmaku(dwords) {
     watchSettings(dwords, 'danmakuColor', refreshDanmakus);
     watchSettings(dwords, 'defaultShowParaphrase', refreshDanmakus);
     watchSettings(dwords, 'disableDanmaku', refreshDanmakus);
+    watchSettings(dwords, 'disableClick', refreshDanmakus);
 }
 
 async function createDanmaku(word) {

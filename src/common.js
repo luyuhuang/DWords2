@@ -16,6 +16,7 @@ exports.DEFAULT_SETTINGS = {
     danmakuFrequency: 7,
     danmakuTransparency: 60,
     danmakuSize: 18,
+    disableClick: false,
     disableDanmaku: false,
     defaultShowParaphrase: false,
     maxPharaphraseLen: 16,
