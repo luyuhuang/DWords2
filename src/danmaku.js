@@ -12,7 +12,7 @@ function initDanmaku(dwords, isStop = false) {
     watchSettings(dwords, 'danmakuFrequency', () => setDanmakuLauncher(dwords, isStop));
 
     setDanmakuMover(dwords);
-    watchSettings(dwords, 'danmakuSpeed', () => setDanmakuMover(dwords));
+    watchSettings(dwords, 'danmakuSpeed', () => setDanmakuMover(dwords, isStop));
 
     watchSettings(dwords, 'externalDictionaries', refreshDanmakus);
     watchSettings(dwords, 'danmakuTransparency', refreshDanmakus);
