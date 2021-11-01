@@ -73,6 +73,7 @@ export default {
       defaultColor: '',
       opacity: 0.5,
       wordSize: '15px',
+      disableClick: false,
       defaultShowParaphrase: false,
     };
   },
@@ -102,12 +103,14 @@ export default {
     async fetchSettings() {
       const settings = await ipcRenderer.invoke('getSettings',
         'externalDictionaries', 'danmakuTransparency', 'maxPharaphraseLen',
-        'danmakuColor', 'defaultShowParaphrase', 'danmakuSize');
+        'danmakuColor', 'disableClick', 'defaultShowParaphrase',
+        'danmakuSize');
 
       this.dictionaries = settings.externalDictionaries;
       this.opacity = settings.danmakuTransparency / 100;
       this.maxPharaphraseLen = settings.maxPharaphraseLen;
       this.defaultColor = settings.danmakuColor;
+      this.disableClick = settings.disableClick;
       this.defaultShowParaphrase = settings.defaultShowParaphrase;
       this.wordSize = settings.danmakuSize + 'px';
     },
@@ -137,6 +140,7 @@ export default {
     },
 
     clickWord() {
+      if (this.disableClick) return;
       this.activated = !this.activated;
     },
 

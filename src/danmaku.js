@@ -20,6 +20,7 @@ function initDanmaku(dwords) {
     watchSettings(dwords, 'maxPharaphraseLen', refreshDanmakus);
     watchSettings(dwords, 'danmakuColor', refreshDanmakus);
     watchSettings(dwords, 'defaultShowParaphrase', refreshDanmakus);
+    watchSettings(dwords, 'disableClick', refreshDanmakus);
 }
 
 async function createDanmaku(word) {

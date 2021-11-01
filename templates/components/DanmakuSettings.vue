@@ -28,6 +28,12 @@
 
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
+        v-model.number="settings.disableClick" @change="change('disableClick')">
+      <label class="form-check-label">Disable Click</label>
+    </div>
+
+    <div class="mb-2 form-check form-switch">
+      <input class="form-check-input" type="checkbox"
         v-model.number="settings.defaultShowParaphrase" @change="change('defaultShowParaphrase')">
       <label class="form-check-label">Default show paraphrase</label>
     </div>
