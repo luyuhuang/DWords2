@@ -146,5 +146,5 @@ function genUUID() {
 
 module.exports = {
     getWinByWebContentsID, getMainWin, getDanmakuWins, toCSV, parseCSV, wait,
-    compareVersions, getSys, setSys, genUUID
+    compareVersions, getSys, setSys, genUUID,
 };
