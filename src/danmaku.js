@@ -118,5 +118,4 @@ function refreshDanmakus() {
 
 module.exports = {
     initDanmaku,
-    setDanmakuLauncher
 };
