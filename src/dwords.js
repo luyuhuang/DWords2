@@ -98,6 +98,12 @@ function setTray(dwords) {
             click() {
                 app.quit();
             }
+        },
+        {
+            label: 'Run/Pause Danmaku',
+            click() {
+                dwords.isDanmakuPaused = !dwords.isDanmakuPaused;
+            }
         }
     ]));
     tray.on('click', showWindow);

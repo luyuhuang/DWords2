@@ -6,8 +6,7 @@ const { getDanmakuWins } = require("./utils");
 
 function initDanmaku(dwords) {
     dwords.currentDanmakus = new Set();
-    dwords.danmakuLauncher = undefined;
-
+    dwords.isDanmakuPaused = false;
     setDanmakuLauncher(dwords);
     watchSettings(dwords, 'danmakuFrequency', () => setDanmakuLauncher(dwords));
 
@@ -60,13 +59,13 @@ async function setDanmakuLauncher(dwords) {
     if (dwords.danmakuLauncher) {
         clearInterval(dwords.danmakuLauncher);
     }
-
     const frequency = await getSetting('danmakuFrequency');
     dwords.danmakuLauncher = setInterval(() => launchDanmaku(dwords), frequency * 1000);
     launchDanmaku(dwords);
 }
 
 async function launchDanmaku(dwords) {
+    if (dwords.isDanmakuPaused) return;
     const planID = await getCurrentPlan();
     if (!planID) return;
 
