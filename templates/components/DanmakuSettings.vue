@@ -29,7 +29,7 @@
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
         v-model.number="settings.disableClick" @change="change('disableClick')">
-      <label class="form-check-label">Disable Click</label>
+      <label class="form-check-label">Disable click</label>
     </div>
 
     <div class="mb-2 form-check form-switch">

@@ -1,5 +1,5 @@
 <template>
-  <div class="d-flex flex-column danmaku" id="widget" ref="widget">
+  <div class="d-flex flex-column danmaku" id="widget" ref="widget" :class="hidden">
     <div class="align-self-start word"
       :style="wordStyle"
       :class="color || defaultColor"
@@ -66,6 +66,7 @@ export default {
       lastX: 0,
       lastY: 0,
       collaspe: null,
+      hidden: '',
 
       colors: ['red', 'coral', 'orange', 'green', 'blue', 'sky', 'dark', 'white'],
       dictionaries: [],
@@ -84,6 +85,7 @@ export default {
 
     this.fetchSettings();
     ipcRenderer.on('refreshDanmaku', this.fetchSettings);
+    ipcRenderer.on('pause', () => this.hidden = 'hidden');
   },
 
   mounted() {
@@ -205,6 +207,12 @@ export default {
   font-size: var(--word-size);
   opacity: var(--danmaku-opacity);
   transition-duration: 0.3s;
+}
+
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s 0.5s, opacity 0.5s linear;
 }
 
 .danmaku .word[activated] {

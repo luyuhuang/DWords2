@@ -1,12 +1,13 @@
 const { DICTIONARIES, DATA_DIR } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
-const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV } = require("./utils");
+const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV, consultDictionary: consult } = require("./utils");
 const settings = require('./settings');
 const { synchronize } = require("./sync");
 const { dialog, app, BrowserWindow, shell } = require("electron");
 const { readFile, writeFile } = require("fs/promises");
 const { currentLogPath } = require("./log");
 const update = require('./update');
+const { pauseDanmaku } = require("./danmaku");
 
 
 function close(event) {
@@ -266,9 +267,7 @@ async function delWord(_, planID, word) {
 }
 
 async function consultDictionary(_, word) {
-    const id = await settings.getSetting('dictionary');
-    const dict = DICTIONARIES[id];
-    const res = await getDictDB().get(`select *, ${dict.field} as paraphrase from ${dict.table} where word = ?`, word);
+    const res = await consult(word);
     return res;
 }
 
@@ -276,7 +275,7 @@ async function search(_, word) {
     const planID = await getCurrentPlan();
     const res = await getUserDB().get(`select * from words
         where word = ? and plan_id = ? and not deleted`, word, planID);
-    let d = await consultDictionary(undefined, word);
+    let d = await consult(word);
     if (res) {
         if (!d) {
             d = {word};
@@ -391,10 +390,20 @@ function checkUpdate() {
     update.checkUpdate(false);
 }
 
+// eslint-disable-next-line require-await
+async function pauseStatus() {
+    return this.isDanmakuPaused;
+}
+
+function pause() {
+    pauseDanmaku(this);
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, getWordIndex, selectPlan, newPlan, renamePlan, delPlan, addWord,
     getWordList, updateWord, delWord, consultDictionary, search, getSettings,
     updateSettings, getWordsByPrefix, toggleDevTools, sync, syncStatus, importPlan,
     showAbout, exit, exportPlan, resetPlan, openLog, openDataDir, checkUpdate,
+    pauseStatus, pause,
 };

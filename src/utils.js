@@ -1,6 +1,8 @@
 const { BrowserWindow } = require('electron');
-const { getUserDB } = require('./database');
+const { getUserDB, getDictDB } = require('./database');
 const { v1 } = require('uuid');
+const { getSetting } = require('./settings');
+const { DICTIONARIES } = require('./common');
 
 function wait(t) {
     return new Promise(resolve => setTimeout(resolve, t));
@@ -144,7 +146,14 @@ function genUUID() {
     return result;
 }
 
+async function consultDictionary(word) {
+    const id = await getSetting('dictionary');
+    const dict = DICTIONARIES[id];
+    const res = await getDictDB().get(`select *, ${dict.field} as paraphrase from ${dict.table} where word = ?`, word);
+    return res;
+}
+
 module.exports = {
     getWinByWebContentsID, getMainWin, getDanmakuWins, toCSV, parseCSV, wait,
-    compareVersions, getSys, setSys, genUUID,
+    compareVersions, getSys, setSys, genUUID, consultDictionary,
 };

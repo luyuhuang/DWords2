@@ -38,15 +38,24 @@
       <Table v-else :words="words" :quiz="quiz" @needMore="needMore">
       </Table>
 
-      <div class="pt-2 pb-2 pe-2 border-top d-flex flex-row-reverse">
-        <button ref="sync" type="button" class="btn btn-primary me-2" :disabled="syncing" @click="clickSync">
-          <span class="spinner-border spinner-border-sm" v-if="syncing"></span>
-          <i class="bi bi-exclamation-circle" v-else-if="syncErr"></i>
-          {{ syncing ? 'Syncing...' : 'Sync' }}
-        </button>
-        <button type="button" class="btn me-2" :class="quiz ? 'btn-secondary' : 'btn-primary'" @click="clickQuiz">
-          {{quiz ? 'Back' : 'Quiz'}}
-        </button>
+      <div class="p-2 border-top d-flex flex-row justify-content-between">
+        <div class="d-flex flex-row">
+          <button type="button" class="btn" :class="paused ? 'btn-success' : 'btn-primary'" @click="clickPause">
+            <i v-if="paused" class="bi bi-play-circle"></i>
+            <i v-else class="bi bi-pause-circle"></i>
+            {{ paused ? 'Run' : 'Pause'}}
+          </button>
+        </div>
+        <div class="d-flex flex-row-reverse">
+          <button ref="sync" type="button" class="btn btn-primary me-2" :disabled="syncing" @click="clickSync">
+            <span v-if="syncing" class="spinner-border spinner-border-sm"></span>
+            <i v-else-if="syncErr" class="bi bi-exclamation-circle"></i>
+            {{ syncing ? 'Syncing...' : 'Sync' }}
+          </button>
+          <button type="button" class="btn me-2" :class="quiz ? 'btn-secondary' : 'btn-primary'" @click="clickQuiz">
+            {{quiz ? 'Back' : 'Quiz'}}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -77,6 +86,7 @@ export default {
       syncTime: 0,
       currentPlan: null,
       inited: false,
+      paused: false,
     };
   },
 
@@ -91,6 +101,9 @@ export default {
       if (err) {
         this.$emit('showToast', {content: err, delay: 3000});
       }
+    });
+    ipcRenderer.on('pauseStatus', (_, paused) => {
+      this.paused = paused;
     });
 
     this.init();
@@ -134,6 +147,10 @@ export default {
       [this.syncing, this.syncErr, this.syncTime] = await ipcRenderer.invoke('syncStatus');
     },
 
+    async fetchPauseStatus() {
+      this.paused = await ipcRenderer.invoke('pauseStatus');
+    },
+
     async appendWordList(words) {
       const res = await ipcRenderer.invoke('getWordList', this.currentTab, 100, words.length);
       words.push(...res.map(word => (word.see = false, word)));
@@ -165,6 +182,10 @@ export default {
     clickSync() {
       ipcRenderer.send('sync');
       this.tooltip.hide();
+    },
+
+    clickPause() {
+      ipcRenderer.send('pause');
     },
 
     clickQuiz() {

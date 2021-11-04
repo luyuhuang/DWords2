@@ -1,8 +1,7 @@
 const { BrowserWindow, screen } = require("electron");
 const { getUserDB } = require("./database");
-const { getCurrentPlan, consultDictionary } = require("./ipc");
 const { watchSettings, getSetting } = require("./settings");
-const { getDanmakuWins } = require("./utils");
+const { getDanmakuWins, getMainWin, getSys, consultDictionary } = require("./utils");
 
 function initDanmaku(dwords) {
     dwords.currentDanmakus = new Set();
@@ -66,7 +65,7 @@ async function setDanmakuLauncher(dwords) {
 
 async function launchDanmaku(dwords) {
     if (dwords.isDanmakuPaused) return;
-    const planID = await getCurrentPlan();
+    const planID = await getSys('currentPlan');
     if (!planID) return;
 
     const maxCurrent = await getSetting('maxCurrent');
@@ -116,6 +115,20 @@ function refreshDanmakus() {
     getDanmakuWins().forEach(win => win.webContents.send('refreshDanmaku'));
 }
 
+function pauseDanmaku(dwords) {
+    dwords.isDanmakuPaused = !dwords.isDanmakuPaused;
+    dwords.trayMenu.getMenuItemById('pause').checked = dwords.isDanmakuPaused;
+    const win = getMainWin();
+    if (win) {
+        win.webContents.send('pauseStatus', dwords.isDanmakuPaused);
+    }
+    if (dwords.isDanmakuPaused) {
+        getDanmakuWins().forEach(win => win.webContents.send('pause'));
+        setTimeout(() => getDanmakuWins().forEach(win => win.close()), 500);
+        dwords.currentDanmakus.clear();
+    }
+}
+
 module.exports = {
-    initDanmaku,
+    initDanmaku, pauseDanmaku,
 };

@@ -1,5 +1,5 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu, shell } = require('electron');
-const { initDanmaku } = require('./danmaku');
+const { initDanmaku, pauseDanmaku } = require('./danmaku');
 const ipc = require('./ipc');
 const { initSettings, watchSettings } = require('./settings');
 const { initSync } = require('./sync');
@@ -92,7 +92,7 @@ function setMenu() {
 function setTray(dwords) {
     const tray = new Tray(path.join(__dirname, '../assets/img/logo@2x.png'));
     tray.setToolTip('DWords');
-    tray.setContextMenu(Menu.buildFromTemplate([
+    const menu = Menu.buildFromTemplate([
         {
             label: 'Exit',
             click() {
@@ -100,14 +100,16 @@ function setTray(dwords) {
             }
         },
         {
-            label: 'Run/Pause Danmaku',
-            click() {
-                dwords.isDanmakuPaused = !dwords.isDanmakuPaused;
-            }
-        }
-    ]));
+            id: 'pause',
+            label: 'Pause Danmaku',
+            type: 'checkbox',
+            click: () => pauseDanmaku(dwords),
+        },
+    ]);
+    tray.setContextMenu(menu);
     tray.on('click', showWindow);
     dwords.tray = tray;
+    dwords.trayMenu = menu;
 }
 
 function setIPC(dwords) {
