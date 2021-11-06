@@ -86,6 +86,7 @@ export default {
     this.fetchSettings();
     ipcRenderer.on('refreshDanmaku', this.fetchSettings);
     ipcRenderer.on('pause', () => this.hidden = 'hidden');
+    ipcRenderer.on('deactivate', () => this.activated = false);
   },
 
   mounted() {
@@ -149,6 +150,10 @@ export default {
     clickMemorized() {
       this.status = this.status === 1 ? 0 : 1;
       ipcRenderer.invoke('updateWord', this.planID, this.word, {status: this.status});
+      if (this.status === 1) {
+        this.activated = false;
+        document.title = 'Danmaku';
+      }
     },
 
     pronounce() {

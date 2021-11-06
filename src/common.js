@@ -20,6 +20,7 @@ exports.DEFAULT_SETTINGS = {
     defaultShowParaphrase: false,
     maxPharaphraseLen: 16,
     danmakuColor: 'dark',
+    closeOnBlur: false,
 
     syncURL: null,
     username: null,

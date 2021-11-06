@@ -51,6 +51,12 @@ async function createDanmaku(word) {
     const y = Math.floor(Math.random() * screenSize.height / 3);
 
     danmaku.setPosition(x, y);
+    danmaku.on('blur', async () => {
+        if (await getSetting('closeOnBlur')) {
+            danmaku.webContents.send('deactivate');
+            danmaku.setTitle('Danmaku');
+        }
+    });
 }
 
 
