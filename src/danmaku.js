@@ -84,7 +84,7 @@ async function launchDanmaku(dwords) {
         planID, maxCurrent, ...dwords.currentDanmakus);
     if (!word) return;
 
-    const res = await consultDictionary(null, word.word);
+    const res = await consultDictionary(word.word);
     if (res) {
         word.phonetic = res.phonetic;
     }
