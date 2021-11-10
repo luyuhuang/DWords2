@@ -35,6 +35,7 @@ function setAppEvents() {
         await getDictDB().close();
         app.quit();
     });
+    app.on('second-instance', showWindow);
 }
 
 function createMainWindow() {
@@ -55,7 +56,7 @@ function createMainWindow() {
 }
 
 function showWindow() {
-    const mainWindow = BrowserWindow.getAllWindows().find(win => win.getTitle() === 'DWords');
+    const mainWindow = getMainWin();
     if (mainWindow) {
         mainWindow.show();
     } else {
