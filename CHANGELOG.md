@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.1.1 (2021-11-13)
+
+- Fix a bug of not showing phonetics
+- Prevent running multiple instances
+
 ## v0.1.0 (2021-11-06)
 
 - Pause playing Danmaku
