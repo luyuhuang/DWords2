@@ -19,7 +19,7 @@ async function checkUpdate(slience) {
     if (compareVersions(version, app.getVersion()) > 0) {
         const {response, checkboxChecked} = await dialog.showMessageBox(getMainWin(), {
             type: 'info',
-            message: `New version ${version} valuable`,
+            message: `New version ${version} available`,
             detail: note,
             checkboxLabel: 'Ignore this version',
             checkboxChecked: ignored,
