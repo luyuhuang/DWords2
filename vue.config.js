@@ -17,5 +17,10 @@ module.exports = {
             template: 'templates/about.html',
             filename: 'about.html',
         },
+        displayArea: {
+            entry: 'templates/displayArea.js',
+            template: 'templates/displayArea.html',
+            filename: 'displayArea.html',
+        },
     }
 };

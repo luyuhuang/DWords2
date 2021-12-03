@@ -26,6 +26,12 @@
         v-model.number="settings.danmakuSize" @change="change('danmakuSize')">
     </div>
 
+    <div class="mb-2">
+      <button type="button" class="btn btn-sm btn-primary me-2" @click="displayArea">
+        Display area
+      </button>
+    </div>
+
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
         v-model.number="settings.disableClick" @change="change('disableClick')">
@@ -65,6 +71,8 @@
 </template>
 
 <script>
+const { ipcRenderer } = window.require("electron");
+
 export default {
   data() {
     return {
@@ -80,6 +88,10 @@ export default {
   methods: {
     change(...keys) {
       this.$emit('change', ...keys);
+    },
+
+    displayArea() {
+      ipcRenderer.send('openDisplayArea');
     },
   },
 };

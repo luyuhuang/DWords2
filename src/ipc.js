@@ -399,11 +399,29 @@ function pause() {
     pauseDanmaku(this);
 }
 
+function openDisplayArea() {
+    const displayArea = new BrowserWindow({
+        useContentSize: true,
+        resizable: true,
+        alwaysOnTop: true,
+        frame: false,
+        transparent: true,
+        backgroundColor: '#00ffffff',
+        hasShadow: false,
+        title: 'Danmaku',
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+        }
+    });
+    displayArea.loadFile('renderer/displayArea.html');
+}
+
 module.exports = {
     close, setIgnoreMouseEvents, setWinSize, moveWin, getPlans, getCurrentPlan,
     getWords, getWordIndex, selectPlan, newPlan, renamePlan, delPlan, addWord,
     getWordList, updateWord, delWord, consultDictionary, search, getSettings,
     updateSettings, getWordsByPrefix, toggleDevTools, sync, syncStatus, importPlan,
     showAbout, exit, exportPlan, resetPlan, openLog, openDataDir, checkUpdate,
-    pauseStatus, pause,
+    pauseStatus, pause, openDisplayArea,
 };
