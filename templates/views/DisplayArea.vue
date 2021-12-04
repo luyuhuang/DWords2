@@ -1,16 +1,31 @@
 <template>
-  <div class="display-area">
+  <div class="display-area d-flex flex-column-reverse" :style="extraStyle">
+    <div class="d-flex flex-row-reverse mb-2">
+      <button type="button" class="btn btn-sm btn-secondary me-2" @click="clickConcel">Concel</button>
+      <button type="button" class="btn btn-sm btn-secondary me-2" @click="clickOK">OK</button>
+      <button type="button" class="btn btn-sm btn-secondary me-2" @click="clickReset">Reset</button>
+    </div>
   <div>
 </template>
 
 <script>
 const { ipcRenderer } = window.require('electron');
+const urlParams = new URLSearchParams(window.location.search);
 
 export default {
+  data() {
+    return {
+      extraStyle: '',
+    };
+  },
+
   created() {
     document.addEventListener('mousedown', this.mouseDown);
     document.addEventListener('mousemove', this.mouseMove);
     document.addEventListener('mouseup', this.mouseUp);
+    if (urlParams.get('platform') === 'darwin') {
+      this.extraStyle = 'border-radius: 10px';
+    }
   },
 
   methods: {
@@ -24,7 +39,7 @@ export default {
       if (this.dragging) {
         const dx = e.screenX - this.lastX;
         const dy = e.screenY - this.lastY;
-        ipcRenderer.sendSync('moveWin', dx, dy);
+        ipcRenderer.sendSync('moveMagnet', dx, dy);
         this.lastX = e.screenX;
         this.lastY = e.screenY;
       }
@@ -33,14 +48,26 @@ export default {
     mouseUp() {
       this.dragging = false;
     },
+
+    clickConcel() {
+      ipcRenderer.send('close');
+    },
+
+    clickOK() {
+      ipcRenderer.send('setDisplayArea');
+    },
+
+    clickReset() {
+      ipcRenderer.invoke('resetDisplayArea');
+    },
   }
 };
 </script>
 
 <style scoped>
 .display-area {
-  border: solid blue;
-  background: skyblue;
+  border: solid gray;
+  background: gainsboro;
   opacity: 0.5;
   width: 100vw;
   height: 100vh;

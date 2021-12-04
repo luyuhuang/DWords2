@@ -1,18 +1,22 @@
 const { DICTIONARIES, DATA_DIR } = require("./common");
 const { getUserDB, getDictDB } = require("./database");
-const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV, consultDictionary: consult } = require("./utils");
+const { getWinByWebContentsID, getMainWin, getSys, setSys, genUUID, parseCSV, consultDictionary: consult, findWinByTitle } = require("./utils");
 const settings = require('./settings');
 const { synchronize } = require("./sync");
-const { dialog, app, BrowserWindow, shell } = require("electron");
+const { dialog, app, BrowserWindow, shell, screen } = require("electron");
 const { readFile, writeFile } = require("fs/promises");
 const { currentLogPath } = require("./log");
 const update = require('./update');
 const { pauseDanmaku } = require("./danmaku");
 
+function hide(event) {
+    const win = getWinByWebContentsID(event.sender.id);
+    win.hide();
+}
 
 function close(event) {
     const win = getWinByWebContentsID(event.sender.id);
-    win.hide();
+    win.close();
 }
 
 function setIgnoreMouseEvents(event, ignore, options) {
@@ -399,7 +403,8 @@ function pause() {
     pauseDanmaku(this);
 }
 
-function openDisplayArea() {
+async function openDisplayArea() {
+    if (findWinByTitle('Display-area')) return;
     const displayArea = new BrowserWindow({
         useContentSize: true,
         resizable: true,
@@ -408,13 +413,50 @@ function openDisplayArea() {
         transparent: true,
         backgroundColor: '#00ffffff',
         hasShadow: false,
-        title: 'Danmaku',
+        title: 'Display-area',
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
-        }
+        },
+        show: false,
     });
-    displayArea.loadFile('renderer/displayArea.html');
+    await displayArea.loadFile('renderer/displayArea.html', {query: {platform: process.platform}});
+    const rect = await settings.getSetting('displayArea');
+    displayArea.setBounds(rect);
+    displayArea.show();
+}
+
+function setDisplayArea(event) {
+    const win = getWinByWebContentsID(event.sender.id);
+    settings.updateSettings(this, {displayArea: win.getBounds()});
+    win.close();
+}
+
+async function resetDisplayArea(event) {
+    const win = getWinByWebContentsID(event.sender.id);
+    settings.updateSettings(this, {displayArea: undefined});
+    const rect = await settings.getSetting('displayArea');
+    win.setBounds(rect);
+}
+
+function moveMagnet(event, dx, dy) {
+    const MAGNET = 10;
+    const win = getWinByWebContentsID(event.sender.id);
+    let {x, y, width, height} = win.getBounds();
+    x += dx, y += dy;
+    const bounds = screen.getDisplayMatching({x, y, width, height}).bounds;
+    const a = bounds.x, b = bounds.y, c = a + bounds.width, d = b + bounds.height;
+    if (Math.abs(x - a) < MAGNET) x = a;
+    if (Math.abs(y - b) < MAGNET) y = b;
+    if (Math.abs(x - c) < MAGNET) x = c;
+    if (Math.abs(y - d) < MAGNET) y = d;
+    if (Math.abs(x + width - a) < MAGNET) x = a - width;
+    if (Math.abs(y + height - b) < MAGNET) y = b - height;
+    if (Math.abs(x + width - c) < MAGNET) x = c - width;
+    if (Math.abs(y + height - d) < MAGNET) y = d - height;
+
+    win.setPosition(x, y);
+    event.returnValue = true;
 }
 
 module.exports = {
@@ -423,5 +465,6 @@ module.exports = {
     getWordList, updateWord, delWord, consultDictionary, search, getSettings,
     updateSettings, getWordsByPrefix, toggleDevTools, sync, syncStatus, importPlan,
     showAbout, exit, exportPlan, resetPlan, openLog, openDataDir, checkUpdate,
-    pauseStatus, pause, openDisplayArea,
+    pauseStatus, pause, openDisplayArea, setDisplayArea, resetDisplayArea, hide,
+    moveMagnet,
 };

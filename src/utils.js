@@ -12,8 +12,12 @@ function getWinByWebContentsID(id) {
     return BrowserWindow.getAllWindows().find(win => win.webContents.id === id);
 }
 
+function findWinByTitle(title) {
+    return BrowserWindow.getAllWindows().find(win => win.getTitle() === title);
+}
+
 function getMainWin() {
-    return BrowserWindow.getAllWindows().find(win => win.getTitle() === 'DWords');
+    return findWinByTitle('DWords');
 }
 
 function getDanmakuWins() {
@@ -155,5 +159,5 @@ async function consultDictionary(word) {
 
 module.exports = {
     getWinByWebContentsID, getMainWin, getDanmakuWins, toCSV, parseCSV, wait,
-    compareVersions, getSys, setSys, genUUID, consultDictionary,
+    compareVersions, getSys, setSys, genUUID, consultDictionary, findWinByTitle,
 };

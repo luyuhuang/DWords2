@@ -176,7 +176,7 @@ export default {
 
     clickClose(e) {
       e.target.blur();
-      ipcRenderer.send('close');
+      ipcRenderer.send('hide');
     },
 
     clickSync() {

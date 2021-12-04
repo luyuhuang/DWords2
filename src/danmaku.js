@@ -1,6 +1,6 @@
-const { BrowserWindow, screen } = require("electron");
+const { BrowserWindow } = require("electron");
 const { getUserDB } = require("./database");
-const { watchSettings, getSetting } = require("./settings");
+const { watchSettings, getSetting, getSettings } = require("./settings");
 const { getDanmakuWins, getMainWin, getSys, consultDictionary } = require("./utils");
 
 function initDanmaku(dwords) {
@@ -11,6 +11,7 @@ function initDanmaku(dwords) {
 
     setDanmakuMover(dwords);
     watchSettings(dwords, 'danmakuSpeed', () => setDanmakuMover(dwords));
+    watchSettings(dwords, 'displayArea', () => setDanmakuMover(dwords));
 
     watchSettings(dwords, 'externalDictionaries', refreshDanmakus);
     watchSettings(dwords, 'danmakuTransparency', refreshDanmakus);
@@ -46,9 +47,9 @@ async function createDanmaku(word) {
     danmaku.setMenu(null);
     danmaku.showInactive();
 
-    const screenSize = screen.getPrimaryDisplay().size;
-    const x = screenSize.width;
-    const y = Math.floor(Math.random() * screenSize.height / 3);
+    const displayArea = await getSetting('displayArea');
+    const x = displayArea.x + displayArea.width;
+    const y = displayArea.y + Math.floor(Math.random() * displayArea.height);
 
     danmaku.setPosition(x, y);
     danmaku.on('blur', async () => {
@@ -98,7 +99,8 @@ async function setDanmakuMover(dwords) {
         clearInterval(dwords.danmakuMover);
     }
 
-    const speed = await getSetting('danmakuSpeed') / 100;
+    const { danmakuSpeed, displayArea } = await getSettings('danmakuSpeed', 'displayArea');
+    const speed = danmakuSpeed / 100;
     let last = new Date().valueOf();
     dwords.danmakuMover = setInterval(() => {
         const now = new Date().valueOf();
@@ -107,7 +109,7 @@ async function setDanmakuMover(dwords) {
         BrowserWindow.getAllWindows().forEach((win) => {
             if (win.getTitle() !== 'Danmaku') return;
             const {x, y, width} = win.getBounds();
-            if (x + width - dis <= 0) {
+            if (x + width - dis <= displayArea.x) {
                 win.close();
                 dwords.currentDanmakus.delete(win.word);
             } else {

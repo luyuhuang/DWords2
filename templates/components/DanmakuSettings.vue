@@ -27,8 +27,8 @@
     </div>
 
     <div class="mb-2">
-      <button type="button" class="btn btn-sm btn-primary me-2" @click="displayArea">
-        Display area
+      <button type="button" class="btn btn-sm btn-outline-success me-3" @click="displayArea">
+        Display area adjustment
       </button>
     </div>
 
@@ -91,7 +91,7 @@ export default {
     },
 
     displayArea() {
-      ipcRenderer.send('openDisplayArea');
+      ipcRenderer.invoke('openDisplayArea');
     },
   },
 };

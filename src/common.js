@@ -1,33 +1,6 @@
 const os = require('os');
 const path = require('path');
 
-exports.DEFAULT_SETTINGS = {
-    dictionary: 'en-en',
-    maxCurrent: 10,
-    autoRun: false,
-    externalDictionaries: [
-        {
-            name: 'Merriam Webster Dictionary',
-            url: 'https://www.merriam-webster.com/dictionary/',
-        },
-    ],
-
-    danmakuSpeed: 12,
-    danmakuFrequency: 7,
-    danmakuTransparency: 60,
-    danmakuSize: 18,
-    disableClick: false,
-    defaultShowParaphrase: false,
-    maxPharaphraseLen: 16,
-    danmakuColor: 'dark',
-    closeOnBlur: false,
-
-    syncURL: null,
-    username: null,
-    password: null,
-    syncInterval: 300,
-};
-
 exports.DICTIONARIES = {
     'en-en': {
         name: 'English-English',
