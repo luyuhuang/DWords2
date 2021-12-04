@@ -71,5 +71,6 @@ export default {
   opacity: 0.5;
   width: 100vw;
   height: 100vh;
+  cursor: move;
 }
 </style>
