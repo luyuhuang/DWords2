@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.2.0 (2021-12-07)
+
+- Danmaku display area adjustment
+- Fix a bug of some certificates expiration
+
 ## v0.1.1 (2021-11-13)
 
 - Fix a bug of not showing phonetics
