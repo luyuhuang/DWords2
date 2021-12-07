@@ -66,9 +66,8 @@ export default {
 
 <style scoped>
 .display-area {
-  border: solid gray;
-  background: gainsboro;
-  opacity: 0.5;
+  border: solid #80808080;
+  background: #dcdcdc48;
   width: 100vw;
   height: 100vh;
   cursor: move;
