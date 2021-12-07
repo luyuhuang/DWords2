@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.1 (2021-12-07)
+
+- Fix a bug that display area adjustment causes danmaku cannot be displayed
+
 ## v0.2.0 (2021-12-07)
 
 - Danmaku display area adjustment
