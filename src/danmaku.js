@@ -45,13 +45,13 @@ async function createDanmaku(word) {
     await danmaku.loadFile('renderer/danmaku.html', { query: word });
     danmaku.setSkipTaskbar(true);
     danmaku.setMenu(null);
-    danmaku.showInactive();
 
     const displayArea = await getSetting('displayArea');
     const x = displayArea.x + displayArea.width;
     const y = displayArea.y + Math.floor(Math.random() * displayArea.height);
-
     danmaku.setPosition(x, y);
+
+    danmaku.showInactive();
     danmaku.on('blur', async () => {
         if (await getSetting('closeOnBlur')) {
             danmaku.webContents.send('deactivate');
@@ -107,7 +107,7 @@ async function setDanmakuMover(dwords) {
         const dis = Math.round((now - last) * speed);
         last = now;
         BrowserWindow.getAllWindows().forEach((win) => {
-            if (win.getTitle() !== 'Danmaku') return;
+            if (!win.isVisible() || win.getTitle() !== 'Danmaku') return;
             const {x, y, width} = win.getBounds();
             if (x + width - dis <= displayArea.x) {
                 win.close();
