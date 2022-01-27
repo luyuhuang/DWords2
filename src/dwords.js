@@ -52,6 +52,7 @@ function createMainWindow() {
         }
     });
 
+    mainWindow.webContents.setWindowOpenHandler(() => ({action: 'deny'}));
     mainWindow.loadFile('renderer/home.html');
 }
 
