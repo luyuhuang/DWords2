@@ -142,9 +142,16 @@ export default {
       }
     },
 
-    clickWord() {
+    clickWord(e) {
       if (this.disableClick) return;
-      this.activated = !this.activated;
+      switch (e.button) {
+        case 0:
+          this.activated = !this.activated;
+          break;
+        case 2:
+          this.pronounce();
+          break;
+      }
     },
 
     clickMemorized() {
