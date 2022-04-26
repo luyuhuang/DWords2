@@ -1,5 +1,10 @@
 # Change Log
 
+## v0.2.2 (2022-04-26)
+
+- Fix a bug that ctrl-click to open a new window
+- Right-click the Danmaku to pronounce
+
 ## v0.2.1 (2021-12-07)
 
 - Fix a bug that display area adjustment causes danmaku cannot be displayed

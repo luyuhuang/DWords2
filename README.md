@@ -5,6 +5,7 @@ Show words as Danmaku on the screen to help you memorize them.
 把单词变成屏幕上的弹幕来帮助你记住它们.
 
 [![release](https://img.shields.io/github/release/luyuhuang/DWords2.svg)][release]
+[![download](https://img.shields.io/github/downloads/luyuhuang/DWords2/total)][release]
 
 ![screenshot](screenshots/screenshot.jpg)
 
