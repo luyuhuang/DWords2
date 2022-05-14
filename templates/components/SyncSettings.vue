@@ -5,19 +5,19 @@
     <div class="mb-2">
       <span class="form-label">WebDAV URL</span>
       <input type="text" class="form-control form-control-sm"
-        v-model.number="settings.syncURL" @change="change('syncURL')">
+        v-model="settings.syncURL" @change="change('syncURL')">
     </div>
 
     <div class="mb-2">
       <span class="form-label">User name</span>
       <input type="text" class="form-control form-control-sm"
-        v-model.number="settings.username" @change="change('username')">
+        v-model="settings.username" @change="change('username')">
     </div>
 
     <div class="mb-2">
       <span class="form-label">Password</span>
       <input type="password" class="form-control form-control-sm"
-        v-model.number="settings.password" @change="change('password')">
+        v-model="settings.password" @change="change('password')">
     </div>
 
     <div class="mb-2">

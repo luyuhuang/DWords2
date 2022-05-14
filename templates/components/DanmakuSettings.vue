@@ -34,19 +34,19 @@
 
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
-        v-model.number="settings.disableClick" @change="change('disableClick')">
+        v-model="settings.disableClick" @change="change('disableClick')">
       <label class="form-check-label">Disable click</label>
     </div>
 
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
-        v-model.number="settings.closeOnBlur" @change="change('closeOnBlur')">
+        v-model="settings.closeOnBlur" @change="change('closeOnBlur')">
       <label class="form-check-label">Close details when out of focus</label>
     </div>
 
     <div class="mb-2 form-check form-switch">
       <input class="form-check-input" type="checkbox"
-        v-model.number="settings.defaultShowParaphrase" @change="change('defaultShowParaphrase')">
+        v-model="settings.defaultShowParaphrase" @change="change('defaultShowParaphrase')">
       <label class="form-check-label">Default show paraphrase</label>
     </div>
 
