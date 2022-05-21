@@ -1,5 +1,9 @@
 # Change Log
 
+## v0.2.3 (2022-05-21)
+
+- Fix a bug that some input boxes can't enter numbers and other characters at the same time
+
 ## v0.2.2 (2022-04-26)
 
 - Fix a bug that ctrl-click to open a new window
